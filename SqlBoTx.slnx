@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="src/SqlBoTx.Net/SqlBoTx.Net.ApiService/SqlBoTx.Net.ApiService.csproj" />
+  <Project Path="src/SqlBoTx.Net/SqlBoTx.Net.AppHost/SqlBoTx.Net.AppHost.csproj" Id="13619548-9bc8-4cd6-8506-18fab0623963" />
+  <Project Path="src/SqlBoTx.Net/SqlBoTx.Net.ServiceDefaults/SqlBoTx.Net.ServiceDefaults.csproj" />
+</Solution>
