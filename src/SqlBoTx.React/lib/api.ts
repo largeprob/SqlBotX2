@@ -60,20 +60,14 @@ class ApiService {
       delete headers['Content-Type'];
     }
 
-    // 创建AbortController用于超时控制
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), timeout)
-
     try {
 
       //发送请求
       const response = await fetch(url, {
         ...fetchOptions,
         headers,
-        signal: controller.signal,
         credentials: options.credentials || 'include',
       })
-      clearTimeout(timeoutId)
 
       const result = await response.json();
       return {
@@ -83,31 +77,25 @@ class ApiService {
       }
     }
     //异常处理
-    catch (error) {
-
-      clearTimeout(timeoutId)
+    catch (error: any) {
 
       // 在开发环境下输出错误信息
       if (import.meta.env.MODE === 'development') {
         console.error(`❌ API Error:`, error)
       }
 
-      if (error instanceof Error && error.name === 'AbortError') {
-
+      if (error instanceof TypeError) {
         return {
           code: 500,
-          msg: '请求超时',
+          msg: '服务异常，请稍后重试',
           data: null as any,
         }
+      }
 
-      } else {
-
-        return {
-          code: 500,
-          msg: error,
-          data: null as any,
-        }
-
+      return {
+        code: 500,
+        msg: error?.message || '网络请求失败',
+        data: null as any,
       }
 
     }
@@ -141,6 +129,7 @@ class ApiService {
     callOk?: () => void,
     callChunk?: (msg: SSEMessage) => void,
   ): Promise<any> {
+
     const url = import.meta.env.VITE_APP_BASEURL + endpoint;
 
     // 合并请求头
@@ -190,7 +179,6 @@ class ApiService {
             }
           }
         }
-
       }
 
       const result = await response.json();
@@ -219,23 +207,24 @@ class ApiService {
         }
 
       }
-
-
     }
   }
 
 
   // 验证用户登录
-  async checkUser(extra?: any): Promise<User> {
-    const res = await this.get<User>('/checkUser', {
-      credentials: "include",
-      ...extra,
-    });
-    console.log('验证用户响应:', res)
-    if (res.code !== 200) {
-      return null as any;
+  async checkUser(extra?: any): Promise<User | null> {
+    try {
+      const res = await this.get<User>('/checkUser', {
+        credentials: "include",
+        ...extra,
+      });
+      if (res.code !== 200) {
+        return null;
+      }
+      return res.data as User;
+    } catch (error) {
+      return null;
     }
-    return res.data as User;
   }
 
   // 登录方法

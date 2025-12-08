@@ -14,7 +14,7 @@ import { userContext } from "./auth/context";
 import { apiService } from "@/lib/api";
 import { AuthLogin } from "./auth/authLogin";
 
-// 服务器端模式中间件
+// 服务器端模式中间件，用以身份验证
 //@ts-ignore
 async function authMiddleware({ context, request }, next) {
   const cookie = request.headers.get("cookie") ?? "";
