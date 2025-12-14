@@ -11,6 +11,9 @@ importers:
       '@heroui/react':
         specifier: ^2.8.4
         version: 2.8.4(@types/react@19.1.13)(framer-motion@12.23.18(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)(tailwindcss@4.1.13)
+      '@icon-park/react':
+        specifier: ^1.4.2
+        version: 1.4.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@radix-ui/react-accordion':
         specifier: ^1.2.12
         version: 1.2.12(@types/react-dom@19.1.9(@types/react@19.1.13))(@types/react@19.1.13)(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
@@ -1069,6 +1072,13 @@ packages:
       '@heroui/theme': '>=2.4.17'
       react: '>=18 || >=19.0.0-rc.0'
       react-dom: '>=18 || >=19.0.0-rc.0'
+
+  '@icon-park/react@1.4.2':
+    resolution: {integrity: sha512-+MtQLjNiRuia3fC/NfpSCTIy5KH5b+NkMB9zYd7p3R4aAIK61AjK0OSraaICJdkKooU9jpzk8m0fY4g9A3JqhQ==}
+    engines: {node: '>= 8.0.0', npm: '>= 5.0.0'}
+    peerDependencies:
+      react: '>=16.9'
+      react-dom: '>=16.9'
 
   '@internationalized/date@3.9.0':
     resolution: {integrity: sha512-yaN3brAnHRD+4KyyOsJyk49XUvj2wtbNACSqg0bz3u8t2VuzhC8Q5dfRnrSxjnnbDb+ienBnkn1TzQfE154vyg==}
@@ -5277,6 +5287,11 @@ snapshots:
       '@heroui/system': 2.4.22(@heroui/theme@2.4.22(tailwindcss@4.1.13))(framer-motion@12.23.18(react-dom@19.1.1(react@19.1.1))(react@19.1.1))(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
       '@heroui/theme': 2.4.22(tailwindcss@4.1.13)
       '@react-aria/focus': 3.21.1(react-dom@19.1.1(react@19.1.1))(react@19.1.1)
+      react: 19.1.1
+      react-dom: 19.1.1(react@19.1.1)
+
+  '@icon-park/react@1.4.2(react-dom@19.1.1(react@19.1.1))(react@19.1.1)':
+    dependencies:
       react: 19.1.1
       react-dom: 19.1.1(react@19.1.1)
 
