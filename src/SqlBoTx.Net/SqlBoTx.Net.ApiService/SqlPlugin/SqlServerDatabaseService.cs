@@ -1,5 +1,6 @@
 ﻿using Dapper;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Compliance.Redaction;
 using Microsoft.Extensions.Options;
 using SqlBoTx.Net.ApiService.Dto;
 using System.Data;
@@ -14,7 +15,7 @@ namespace SqlBoTx.Net.ApiService.SqlPlugin
     /// </summary>
     public class SqlServerDatabaseService
     {
-        private const string _connectionString = "Server=.;Database=sqlbotx_1;User Id=sa;Password=123456;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;";
+        private const string _connectionString = "Server=.;Database=sqlbotx_2;User Id=sa;Password=123456;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;";
 
         /// <summary>
         /// 获取链接
@@ -25,16 +26,19 @@ namespace SqlBoTx.Net.ApiService.SqlPlugin
             return new SqlConnection(_connectionString);
         }
 
-        private string BuildMasterConnectionString(string baseConnectionString)
-        {
-            var builder = new SqlConnectionStringBuilder(baseConnectionString)
-            {
-                InitialCatalog = "master", 
-                ConnectTimeout = 30,       
-                ApplicationName = "DatabaseCreator"
-            };
 
-            return builder.ConnectionString;
+        /// <summary>
+        /// 获取表基础信息和关系图
+        /// </summary>
+        /// <returns></returns>
+        public string GetTableRelationships()
+        {
+            FileInfo dataRoot = new FileInfo(typeof(Program).Assembly.Location);
+            string fullPath = Path.Combine(dataRoot.Directory.FullName, "SqlPlugin");
+            string filePath = Path.Combine(fullPath, "TableRelationships.json");
+
+            string jsonString = File.ReadAllText(filePath);
+            return jsonString;
         }
 
         /// <summary>
@@ -186,7 +190,7 @@ namespace SqlBoTx.Net.ApiService.SqlPlugin
                 {
                     TableName = $"{schema}.{name}",
                     Description = tableDescription,
-                    Columns = new List<TableSchemaColumnInfo>()
+                    Columns = columns
                 });
             }
 
@@ -228,7 +232,8 @@ ORDER BY t.name;";
             }
         }
 
-        public async Task<IEnumerable<dynamic>> ExecuteQueryAsync(string sql) {
+        public async Task<IEnumerable<dynamic>> ExecuteQueryAsync(string sql)
+        {
             using (var connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
@@ -236,4 +241,7 @@ ORDER BY t.name;";
             }
         }
     }
+
+
+ 
 }

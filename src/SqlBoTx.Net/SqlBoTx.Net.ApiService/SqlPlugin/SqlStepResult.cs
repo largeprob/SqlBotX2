@@ -1,4 +1,6 @@
-﻿namespace SqlBoTx.Net.ApiService.SqlPlugin
+﻿using SqlBoTx.Net.ApiService.Dto;
+
+namespace SqlBoTx.Net.ApiService.SqlPlugin
 {
     /// <summary>
     /// sql chat 返回结果
@@ -18,7 +20,7 @@
         /// <summary>
         /// chat response message
         /// </summary>
-        public SqlStepColumns[]? Columns { get; set; }   
+        public List<TableColumn> Columns { get; set; }   
 
         /// <summary>
         /// chat response sql
@@ -31,16 +33,5 @@
         public bool NeedChart { get; set; }
     }
 
-    public class SqlStepColumns 
-    {
-        /// <summary>
-        /// chat response data
-        /// </summary>
-        public string Lable { get; set; } = default!;
-
-        /// <summary>
-        /// chat response data
-        /// </summary>
-        public string Key{ get; set; } = default!;
-    }
+    
 }

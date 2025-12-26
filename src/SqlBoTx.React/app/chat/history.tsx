@@ -96,7 +96,7 @@ export default function ChatHistory() {
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 scroll-smooth">
+            <div className="flex flex-col p-4 gap-2">
                 {mockHistory.map((item) => (
                     <div
                         key={item.id}
@@ -135,8 +135,8 @@ export default function ChatHistory() {
                 ))}
             </div>
 
-        
-            
+
+
         </div>
     );
 }

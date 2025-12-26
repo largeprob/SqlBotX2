@@ -1,5 +1,7 @@
+using Azure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.SemanticKernel;
 using Microsoft.SemanticKernel.ChatCompletion;
@@ -10,7 +12,9 @@ using System;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using static Dapper.SqlMapper;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace SqlBoTx.Net.ApiService
 {
@@ -21,19 +25,64 @@ namespace SqlBoTx.Net.ApiService
     {
         extension(WebApplication app) {
 
+         
+
             public WebApplication ChatApi()
             {
-                app.MapPost("/chat", async ([FromBody] SQLChatMessage message,
-                    [FromServices] Kernel _kernel, 
-                    [FromServices] IChatCompletionService _chatCompletion, 
+                // 定义标记，建议使用不太可能出现在正文中的特殊字符组合
+                const string START_MARKER = "<<STREAM_START>>";
+                const string END_MARKER = "<<STREAM_END>>";
+
+                app.MapPost("/chat", async ([FromBody] ChatMessage message,
+                    [FromServices] Kernel _kernel,
+                    [FromServices] IChatCompletionService _chatCompletion,
                     [FromServices] ILogger<Program> _logger,
                     [FromServices] SqlServerDatabaseService _sqlServerDatabase,
-                    HttpContext context
+                    HttpContext context, CancellationToken ct
                     ) =>
                 {
                     context.Response.ContentType = "text/event-stream";
                     context.Response.Headers.Append("Cache-Control", "no-cache");
                     context.Response.Headers.Append("X-Accel-Buffering", "no");
+
+                    var userInput = (message.Content[0] as ContentBlockText).Text;
+
+                    //若没有携带SessionIdID，创建新会话SessionId
+                    var sessionId = Guid.CreateVersion7();
+                    await SendSessionAsync(context, sessionId, ct);
+
+                    //发送空信息标记正在思考
+                    var msgId = Guid.CreateVersion7();
+                    await SendMessageAsync(context, new ChatMessage
+                    {
+                        SessionId = sessionId,
+                        Id = msgId,
+                        Role = Role.Assistant,
+                        Status = MessageStatus.Streaming,
+                        CreatedAt = new DateTime().Ticks
+                    }, ct);
+
+
+                    //// 2. 发送开始标记
+                    //await SendDeltaAsync(context, START_MARKER, ct);
+
+                    //// 模拟思考延迟
+                    //await Task.Delay(5000, ct);
+
+                    //// 3. 发送纯内容（模拟 LLM 生成）
+                    //var content = "这是一个测试内容。这里的数据没有 data: 前缀。";
+                    //foreach (var charItem in content)
+                    //{
+                    //    if (ct.IsCancellationRequested) break;        
+
+                    //    await SendDeltaAsync(context, charItem.ToString(), ct);
+
+                    //    await Task.Delay(50, ct); // 模拟打字机速度
+                    //}
+
+                    //// 4. 发送结束标记
+
+                    //await SendDeltaAsync(context, END_MARKER, ct);
 
 
                     var promptSettings = new OpenAIPromptExecutionSettings
@@ -47,9 +96,9 @@ namespace SqlBoTx.Net.ApiService
                       SystemPrompts.Intention,
                       promptSettings), new KernelArguments
                       {
-                          ["input"] = message.Content
+                          ["input"] = userInput
                       });
-              
+
                     //本次消耗tokens
                     if (intentionChat.Metadata != null && intentionChat.Metadata.ContainsKey("Usage"))
                     {
@@ -61,6 +110,27 @@ namespace SqlBoTx.Net.ApiService
                     var intentionChatJson = intentionChat.GetValue<string>();
                     _logger.LogInformation($"intentionChat:{intentionChatJson}");
                     var sqlStepIntention = JsonSerializer.Deserialize<SqlStepIntention>(intentionChatJson);
+                    if (sqlStepIntention.IsStep == false)
+                    {
+                        await SendMessageAsync(context, new ChatMessage
+                        {
+                            SessionId = sessionId,
+                            Id = msgId,
+                            Role = Role.Assistant,
+                            Status = MessageStatus.Done,
+                            CreatedAt = new DateTime().Ticks,
+                            Content = new List<BaseContentBlock> {
+                              new ContentBlockText {
+                                  Status = BlockStatus.Done,
+                                  Text = sqlStepIntention.Message
+                              }
+                            }
+                        }, ct);
+                        return;
+                    }
+
+
+                    return;
 
                     //2.生成SQL
                     var getTableSchema = await _sqlServerDatabase.GetTableSchema(await _sqlServerDatabase.GetAllTableNames());
@@ -72,7 +142,7 @@ namespace SqlBoTx.Net.ApiService
                     ), new KernelArguments
                     {
                         ["schema"] = _dbSchema,
-                        ["input"] = message.Content
+                        ["input"] = userInput
                     });
                     //本次消耗tokens
                     if (sqlChat.Metadata != null && sqlChat.Metadata.ContainsKey("Usage"))
@@ -87,11 +157,11 @@ namespace SqlBoTx.Net.ApiService
                     var sqlStepResult = JsonSerializer.Deserialize<SqlStepResult>(sqlChatJson);
                     if (!string.IsNullOrEmpty(sqlStepResult.Message))
                     {
-                        await SendDeltaAsync(context, sqlStepResult.Message);
+                        //await SendDeltaAsync(context, sqlStepResult.Message);
                     }
                     if (!string.IsNullOrEmpty(sqlStepResult.Sql))
                     {
-                        await SendSqlBlockAsync(context, [sqlStepResult.Sql]);
+                        //await SendSqlBlockAsync(context, [sqlStepResult.Sql]);
                     }
 
                     //如果需要图表
@@ -102,7 +172,7 @@ namespace SqlBoTx.Net.ApiService
                            promptSettings
                            ), new KernelArguments
                            {
-                               ["input"] = message.Content,
+                               ["input"] = userInput,
                                ["sql"] = sqlStepResult.Sql,
                            });
 
@@ -121,14 +191,14 @@ namespace SqlBoTx.Net.ApiService
                         var sqlExecutionResult = await _sqlServerDatabase.ExecuteQueryAsync(sqlStepResult.Sql);
 
                         var processedOption = Helpers.InjectDataIntoEchartsOption(echartsChatJson, sqlExecutionResult.ToArray());
-                        await SendEchartsBlockAsync(context, processedOption);
+                        //await SendEchartsBlockAsync(context, processedOption);
                     }
 
                     //如果需要基础表格
                     if (sqlStepIntention.OutVisualType == OutVisualType.BasicTable)
                     {
                         var sqlExecutionResult = await _sqlServerDatabase.ExecuteQueryAsync(sqlStepResult.Sql);
-                        await SendTableBlockAsync(context, sqlStepResult.Columns, sqlExecutionResult, sqlExecutionResult.Count());
+                        //await SendTableBlockAsync(context, sqlStepResult.Columns, sqlExecutionResult, sqlExecutionResult.Count());
                     }
 
                 })
@@ -141,7 +211,7 @@ namespace SqlBoTx.Net.ApiService
                     });
 
 
-                app.MapGet("/chatTool", async (string userQuery, [FromServices] Kernel _kernel, [FromServices] IChatCompletionService _chatCompletion, [FromServices] ILogger<Program> _logger, [FromServices] SqlPlugin.Plugin _plugin) =>
+                app.MapGet("/chatTool", async (string userQuery, [FromServices] Kernel _kernel, [FromServices] IChatCompletionService _chatCompletion, [FromServices] ILogger<Program> _logger, [FromServices] SqlPlugin.SqlBotPlugin _plugin) =>
                 {
                     string _dbSchema = @"
         Table: Products (Id, Name, Category, Price, Stock)
@@ -259,12 +329,6 @@ namespace SqlBoTx.Net.ApiService
 第四步：校验 SQL 语句的正确性以及是否符合规则
 第五步：直接向用户返回数据
 ";
-
-
-
-
-
-
                 })
                   .WithName("chatTool")
                   .AddOpenApiOperationTransformer((opperation, context, ct) =>
@@ -274,127 +338,42 @@ namespace SqlBoTx.Net.ApiService
                       return Task.CompletedTask;
                   });
 
-
-                app.MapGet("/chatToolSSE", async (string userQuery, 
-                    [FromServices] Kernel _kernel,
-                    [FromServices]  IChatCompletionService _chatCompletion, 
-                    [FromServices]  ILogger<Program> _logger) =>
+                async Task SendDeltaAsync(HttpContext context, string text, CancellationToken ct)
                 {
-                    string _dbSchema = @"
-        Table: Products (Id, Name, Category, Price, Stock)
-        Table: Sales (Id, ProductId, SaleDate, Quantity, Amount)
-    ";
+                    await context.Response.WriteAsync(
+                        $"event: delta\n" +
+                        $"data: {text}\n\n",
+                        ct);
+                    await context.Response.Body.FlushAsync(ct);
+                }
 
-                    // 核心 Prompt 模板
-                    const string SqlSystemPrompt = @"
-基础数据：
-    这是数据库的 Schema 定义：
-    {{$schema}}
-
-角色定义：
-你是一个拥有数据库操作权限的 SQL Server 智能助手。
-
-核心规则：
-1. Schema：你的理解范围仅限于提供的 Schema 定义，不要臆造不存在的表或字段。
-2. Schema越界处理：当用户请求超出 Schema 范围时，尝试从工具获取，若工具中数据不符合，请在 `Message` 参数中礼貌拒绝。
-3. 语法要求：确保 sql 在 SQL Server 中可直接执行。涉及日期请使用标准格式。
-
-重要安全规则（必须严格遵守）：
-1. **默认行数限制**：如果用户没有明确要求“全部”或指定具体数量，生成的 SQL 必须包含 `TOP 20`。
-2. **大数据熔断保护**：
-   - 警告：即使用户明确说“查询所有数据”或“显示全部”，**绝对禁止**生成 `SELECT *`（这会导致性能事故）。
-   - 操作：你必须强制将查询限制为 `TOP 50`。
-   - 解释：必须在工具的 `Message` 参数中告知用户：“为了保护数据库性能，已为您展示前 50 条数据。如需更多，请指定具体过滤条件。”
-3. **分页语法**：如果用户要求“下一页”，必须在 `sql_query` 中使用 `ORDER BY ... OFFSET ... ROWS FETCH NEXT ... ROWS ONLY` 语法。
-
-强制性工作流程：
-1：分析用户的自然语言意图（结合 {{$history}}）。
-2：判断是否需要可视化（决定 `NeedChart` 参数）。
-3：判断是否超出 Schema 范围，尝试从工具中寻找解决方案。
-4：结合 Schema 生成安全的 SQL 语句（构建 `sql` 参数）。
-5：检查 SQL 是否违反“大数据保护”规则，如有必要进行修正。
-
-最终返回值规则：
-在最后你选择结束本次对话时，你的返回值必须是一个 JSON 对象，结构为：
-``Message(string),Sql(string), NeedChart(bool)``。
-
-用户当前输入: 
-{{$input}}
-";
-                    var promptSettings = new OpenAIPromptExecutionSettings
+                async Task SendMessageAsync(HttpContext context, ChatMessage message, CancellationToken ct)
+                {
+                    var json = JsonSerializer.Serialize(message, message.GetType(), new JsonSerializerOptions
                     {
-                        Temperature = 0,
-                        ResponseFormat = "json_object",
-                        FunctionChoiceBehavior = FunctionChoiceBehavior.Auto(),
-                    };
-                    var convertFunction = _kernel.CreateFunctionFromPrompt(
-                        SqlSystemPrompt,
-                        promptSettings
-                    );
-
-                    //流
-                    var sqlResult = _kernel.InvokeStreamingAsync(convertFunction, new KernelArguments
-                    {
-                        ["schema"] = _dbSchema,
-                        ["input"] = userQuery
+                        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                        WriteIndented = false,
+                        Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                        Converters =
+                        {
+                            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
+                        }
                     });
-                    await foreach (var chunk in sqlResult)
-                    {
-                        Console.Write(chunk);
-                    }
+                    await context.Response.WriteAsync(
+                        $"event: message\n" +
+                        $"data: {json}\n\n",
+                        ct);
+                    await context.Response.Body.FlushAsync(ct);
+                }
 
-                    Console.WriteLine(sqlResult);
-
-                    //// 解析 JSON
-                    //var jsonStr = sqlResult.GetValue<string>();
-                    //_logger.LogInformation(jsonStr);
-
-                    //var resultObj = JsonSerializer.Deserialize<SqlStepResult>(jsonStr);
-
-
-                    ////本次消耗tokens
-                    //var metadata = sqlResult.Metadata;
-                    //if (metadata != null && metadata.ContainsKey("Usage"))
-                    //{
-                    //    var usage = (dynamic)metadata["Usage"];
-                    //    _logger.LogInformation($"本次消耗：{usage.TotalTokenCount} tokens");
-                    //}
-
-                    //将sql放入空置数据库执行，以验证sql是否正确
-
-                    //如果不需要图表，直接返回结果
-
-
-                    //如果需要图表，开启第二轮对话，将结果放入以生成Echarts JSON
-
-
-                    // 核心 Prompt 模板
-                    const string EchartsSystemPrompt = @"
-角色定义：
-你是一个 Echarts 专家,你的任务是将数据结果转为Echarts渲染数据集。
-
-核心规则：
-你对表架构的理解范围仅限于提供的 Schema 定义。
-确保 生成的Echarts JSON 可运行。
-
-强制性工作流程：
-第一步：了解用户的意图（考虑对话历史）
-第二步：判断用户是否需要可视化图表（例如提到'趋势'、'图'、'占比'或数据显然适合图表展示）
-第三步：结合 Schema 生成符合用户意图的 SQL 查询语句
-第四步：校验 SQL 语句的正确性以及是否符合规则
-第五步：直接向用户返回数据
-";
-
-                })
-                .WithName("chatToolSSE")
-                .AddOpenApiOperationTransformer((opperation, context, ct) =>
+                async Task SendSessionAsync(HttpContext context, Guid sessionId, CancellationToken ct)
                 {
-                    opperation.Summary = "对话包含工具调用";
-                    opperation.Description = "基础对话SSE";
-                    return Task.CompletedTask;
-                });
-
-
+                    await context.Response.WriteAsync(
+                        $"event: session\n" +
+                        $"data: {sessionId}\n\n",
+                        ct);
+                    await context.Response.Body.FlushAsync(ct);
+                }
 
                 return app;
             }
@@ -449,67 +428,9 @@ namespace SqlBoTx.Net.ApiService
                 return app;
             }
 
-            /// <summary>
-            /// 发送增量文本（流式输出）
-            /// </summary>
-            private static async Task SendDeltaAsync(HttpContext context, string delta)
-            {
-                var message = new Dto.DeltaMessage { Delta = delta };
-                await SendMessageAsync(context, message);
-            }
+       
 
 
-
-            /// <summary>
-            /// 发送内容块
-            /// </summary>
-            private static async Task SendBlockAsync(HttpContext context, Dto.ContentBlock block)
-            {
-                var message = new Dto.BlockMessage { Block = block };
-                await SendMessageAsync(context, message);
-            }
-
-            /// <summary>
-            /// 发送 SQL 块
-            /// </summary>
-            private static async Task SendSqlBlockAsync(HttpContext context, string[] sqls, string? dialect = null)
-            {
-                foreach (var sql in sqls)
-                {
-                    var block = new Dto.SqlBlock
-                    {
-                        Sql = sql,
-                        Dialect = dialect
-                    };
-                    await SendBlockAsync(context, block);
-                }
-            }
-
-            /// <summary>
-            /// 发送内容块
-            /// </summary>
-            private static async Task SendEchartsBlockAsync(HttpContext context, string options)
-            {
-                var chartBlock = new EchartsBlock
-                {
-                    EchartsOption = options
-                };
-                await SendBlockAsync(context, chartBlock);
-            }
-
-            /// <summary>
-            /// 发送数据块
-            /// </summary>
-            private static async Task SendTableBlockAsync(HttpContext context, SqlStepColumns[] columns, IEnumerable<dynamic> rows, int totalRows)
-            {
-                var block = new Dto.TableBlock
-                {
-                    Columns = columns,
-                    Rows = rows,
-                    TotalRows = totalRows
-                };
-                await SendBlockAsync(context, block);
-            }
 
             /// <summary>
             /// 发送数据
@@ -517,7 +438,7 @@ namespace SqlBoTx.Net.ApiService
             /// <param name="context"></param>
             /// <param name="message"></param>
             /// <returns></returns>
-            private static async Task SendMessageAsync(HttpContext context, Dto.SSEMessage message)
+            private static async Task SendMesageAsync(HttpContext context, ChatMessage message, Guid? id)
             {
                 var json = JsonSerializer.Serialize(message, message.GetType(), new JsonSerializerOptions
                 {
@@ -532,7 +453,40 @@ namespace SqlBoTx.Net.ApiService
                 await context.Response.Body.FlushAsync();
             }
 
-       
+            /// <summary>
+            /// 送增量文本（流式输出）
+            /// </summary>
+            /// <param name="context"></param>
+            /// <param name="id"></param>
+            /// <param name="content"></param>
+            /// <returns></returns>
+            private static async Task SendDeltaAsync(HttpContext context, Guid? id, string content)
+            {
+                var message = new ChatMessage()
+                {
+                    Id = id,
+                    Role = Role.Assistant,
+                    Content = new List<BaseContentBlock> {
+                        new ContentBlockText{
+                            Text  = content,
+                            Status = BlockStatus.Streaming
+                        }
+                    }
+                };
+
+                var json = JsonSerializer.Serialize(message, message.GetType(), new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    WriteIndented = false,
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                });
+                var data = $"data: {json}\n\n";
+                var bytes = Encoding.UTF8.GetBytes(data);
+
+                await context.Response.Body.WriteAsync(bytes);
+                await context.Response.Body.FlushAsync();
+            }
+
         }
     }
 }

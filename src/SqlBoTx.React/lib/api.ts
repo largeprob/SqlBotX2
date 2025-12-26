@@ -1,5 +1,6 @@
 import type { User } from "@/types"
-import type { SSEMessage } from "@/types/messages"
+import { fetchEventSource, type EventSourceMessage } from '@microsoft/fetch-event-source';
+
 
 interface ApiResponse<T = any> {
   code: number
@@ -16,6 +17,7 @@ interface ApiRequestConfig {
 class ApiService {
   private defaultHeaders: Record<string, string>
   private defaultTimeout: number
+  private abortController?: AbortController;
 
   constructor() {
     this.defaultTimeout = 15000
@@ -29,6 +31,8 @@ class ApiService {
       console.log('defaultHeaders:', this.defaultHeaders)
       console.groupEnd()
     }
+
+
   }
 
   // 设置默认请求头
@@ -127,7 +131,7 @@ class ApiService {
     endpoint: string,
     data?: any,
     callOk?: () => void,
-    callChunk?: (msg: SSEMessage) => void,
+    callChunk?: (msg: any) => void,
   ): Promise<any> {
 
     const url = import.meta.env.VITE_APP_BASEURL + endpoint;
@@ -172,7 +176,7 @@ class ApiService {
             const data = line.slice(6);
             try {
               console.log('SSE Raw Data:', data);
-              const message = JSON.parse(data) as SSEMessage;
+              const message = JSON.parse(data) as any;
               !!callChunk ? callChunk(message) : null;
             } catch (e) {
               console.error('Failed to parse SSE message:', e, data);
@@ -238,7 +242,70 @@ class ApiService {
     }
     return res;
   }
+
+
+  // 开始 sse
+  async sseEventSource<T>(
+    endpoint: string,
+    data: any,
+    open: () => void,
+    message: (msg: EventSourceMessage) => void,
+    colse: () => void,
+  ): Promise<any> {
+
+    const url = import.meta.env.VITE_APP_BASEURL + endpoint;
+
+    if (this.abortController) {
+      this.abortController.abort();
+    }
+    this.abortController = new AbortController();
+    const ctr = this.abortController;
+
+
+
+
+    await fetchEventSource(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data ? JSON.stringify(data) : undefined,
+      openWhenHidden: true,
+      signal: ctr.signal,
+      async onopen(response) {
+        console.log(response)
+        open();
+      },
+      onmessage(ev) {
+        console.log(ev);
+        message(ev)
+      },
+      onclose() {
+        console.log('onclose');
+        colse();
+      },
+      onerror(err) {
+        console.log(err);
+        throw err;
+      }
+    },
+    );
+  }
+
+  // 停止 sse
+  sseEventStop(close: () => void) {
+    if (this.abortController) {
+      // 发送中断信号
+      this.abortController.abort();
+      // 重新初始化以便下次使用（或者在 start 时初始化也可以）
+      this.abortController = new AbortController();
+
+      console.log('SSE 请求已中止');
+      !!close && close();
+    }
+  }
 }
+
 
 
 

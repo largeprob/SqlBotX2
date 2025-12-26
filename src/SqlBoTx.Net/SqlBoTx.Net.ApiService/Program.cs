@@ -1,5 +1,8 @@
+using Newtonsoft.Json.Serialization;
 using SqlBoTx.Net.ApiService;
 using SqlBoTx.Net.ApiService.SqlPlugin;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,12 +14,19 @@ builder.Services.AddProblemDetails();
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(
+            new JsonStringEnumConverter(JsonNamingPolicy.CamelCase)
+        );
+    });
 
 
 builder.Services.AddScoped<SqlServerDatabaseService>();
 builder.AddKernelCompletion();
 
-
+builder.Services.AddTransient<SqlBotPlugin>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("FirstAgent", builder =>
@@ -49,7 +59,7 @@ if (app.Environment.IsDevelopment())
 app.MapDefaultEndpoints();
 
 app.UseCors("FirstAgent");
-
+app.MapControllers();
 app.Run();
 
  

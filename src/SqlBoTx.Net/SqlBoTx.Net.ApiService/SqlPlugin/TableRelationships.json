@@ -1,0 +1,282 @@
+{
+  "TableRelationships": [
+    {
+      "TableName": "Organization",
+      "Description": "组织表，支持上下级",
+      "Relationships": [
+        {
+          "SourceColumn": "ParentOrganizationId",
+          "TargetTable": "Organization",
+          "TargetColumn": "OrganizationId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "子引用上下级"
+        }
+      ]
+    },
+    {
+      "TableName": "Department",
+      "Description": "部门表，支持上下级",
+      "Relationships": [
+        {
+          "SourceColumn": "ParentDepartmentId",
+          "TargetTable": "Department",
+          "TargetColumn": "DepartmentId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "子引用上下级"
+        },
+        {
+          "SourceColumn": "OrganizationId",
+          "TargetTable": "Organization",
+          "TargetColumn": "OrganizationId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "所属组织ID"
+        },
+        {
+          "SourceColumn": "ManagerUserId",
+          "TargetTable": "UserInfo",
+          "TargetColumn": "UserId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "部门负责人用户ID"
+        }
+      ]
+    },
+    {
+      "TableName": "UserInfo",
+      "Description": "用户信息表，存储系统用户数据",
+      "Relationships": [
+        {
+          "SourceColumn": "OrganizationId",
+          "TargetTable": "Organization",
+          "TargetColumn": "OrganizationId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "组织ID"
+        },
+        {
+          "SourceColumn": "DepartmentId",
+          "TargetTable": "Department",
+          "TargetColumn": "DepartmentId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "部门ID"
+        }
+      ]
+    },
+    {
+      "TableName": "Product",
+      "Description": "产品信息表，存储所有可销售的产品数据",
+      "Relationships": []
+    },
+    {
+      "TableName": "Customer",
+      "Description": "客户信息表，统一管理公海客户和正式客户",
+      "Relationships": [
+        {
+          "SourceColumn": "OwnerUserId",
+          "TargetTable": "UserInfo",
+          "TargetColumn": "UserId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "负责人用户ID，如果为空则表示在公海中"
+        }
+      ]
+    },
+    {
+      "TableName": "Opportunity",
+      "Description": "商机信息表，记录销售机会的全过程",
+      "Relationships": [
+        {
+          "SourceColumn": "CustomerId",
+          "TargetTable": "Customer",
+          "TargetColumn": "CustomerId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "客户ID"
+        },
+        {
+          "SourceColumn": "SalesOwnerUserId",
+          "TargetTable": "UserInfo",
+          "TargetColumn": "UserId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "销售负责人用户ID"
+        }
+      ]
+    },
+    {
+      "TableName": "Quotation",
+      "Description": "销售报价表，记录普通项目的报价信息",
+      "Relationships": [
+        {
+          "SourceColumn": "OpportunityId",
+          "TargetTable": "Opportunity",
+          "TargetColumn": "OpportunityId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "商机ID"
+        },
+        {
+          "SourceColumn": "CustomerId",
+          "TargetTable": "Customer",
+          "TargetColumn": "CustomerId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "客户ID"
+        }
+      ]
+    },
+    {
+      "TableName": "Bid",
+      "Description": "销售投标表，记录招投标项目的投标信息",
+      "Relationships": [
+        {
+          "SourceColumn": "OpportunityId",
+          "TargetTable": "Opportunity",
+          "TargetColumn": "OpportunityId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "商机ID"
+        },
+        {
+          "SourceColumn": "CustomerId",
+          "TargetTable": "Customer",
+          "TargetColumn": "CustomerId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "客户ID"
+        }
+      ]
+    },
+    {
+      "TableName": "ProjectApproval",
+      "Description": "销售立项表，记录内部评审和立项信息",
+      "Relationships": [
+        {
+          "SourceColumn": "ReferenceId",
+          "TargetTable": "Quotation",
+          "TargetColumn": "QuotationId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "引用ID，当ReferenceType=1时对应QuotationId"
+        },
+        {
+          "SourceColumn": "ReferenceId",
+          "TargetTable": "Bid",
+          "TargetColumn": "BidId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "引用ID，当ReferenceType=2时对应BidId"
+        },
+        {
+          "SourceColumn": "OpportunityId",
+          "TargetTable": "Opportunity",
+          "TargetColumn": "OpportunityId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "商机ID"
+        },
+        {
+          "SourceColumn": "CustomerId",
+          "TargetTable": "Customer",
+          "TargetColumn": "CustomerId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "客户ID"
+        }
+      ]
+    },
+    {
+      "TableName": "Contract",
+      "Description": "销售合同表，记录正式签订的合同信息",
+      "Relationships": [
+        {
+          "SourceColumn": "ProjectApprovalId",
+          "TargetTable": "ProjectApproval",
+          "TargetColumn": "ProjectApprovalId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "立项ID"
+        },
+        {
+          "SourceColumn": "OpportunityId",
+          "TargetTable": "Opportunity",
+          "TargetColumn": "OpportunityId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "商机ID"
+        },
+        {
+          "SourceColumn": "CustomerId",
+          "TargetTable": "Customer",
+          "TargetColumn": "CustomerId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "客户ID"
+        },
+        {
+          "SourceColumn": "ParentContractId",
+          "TargetTable": "Contract",
+          "TargetColumn": "ContractId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "父合同ID（用于补充协议）"
+        }
+      ]
+    },
+    {
+      "TableName": "ContractDetail",
+      "Description": "合同明细表，记录合同的产品明细信息",
+      "Relationships": [
+        {
+          "SourceColumn": "ContractId",
+          "TargetTable": "Contract",
+          "TargetColumn": "ContractId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "合同ID"
+        },
+        {
+          "SourceColumn": "ProductId",
+          "TargetTable": "Product",
+          "TargetColumn": "ProductId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "产品ID"
+        }
+      ]
+    },
+    {
+      "TableName": "ContractChange",
+      "Description": "合同变更表，记录合同的变更申请和审批信息",
+      "Relationships": [
+        {
+          "SourceColumn": "ContractId",
+          "TargetTable": "Contract",
+          "TargetColumn": "ContractId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "合同ID"
+        }
+      ]
+    },
+    {
+      "TableName": "ContractHandover",
+      "Description": "合同交底表，记录合同签署后的交底信息",
+      "Relationships": [
+        {
+          "SourceColumn": "ContractId",
+          "TargetTable": "Contract",
+          "TargetColumn": "ContractId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "合同ID"
+        },
+        {
+          "SourceColumn": "SalesRepresentativeId",
+          "TargetTable": "UserInfo",
+          "TargetColumn": "UserId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "销售代表ID"
+        },
+        {
+          "SourceColumn": "DeliveryTeamLeaderId",
+          "TargetTable": "UserInfo",
+          "TargetColumn": "UserId",
+          "RelationType": "MANY_TO_ONE",
+          "Description": "交付团队负责人ID"
+        }
+      ]
+    }
+  ],
+  "TableDependencies": {
+    "Organization": [ "Department", "UserInfo", "Customer" ],
+    "Department": [ "UserInfo", "Department" ],
+    "UserInfo": [ "Customer", "Opportunity", "ContractHandover" ],
+    "Product": [ "ContractDetail" ],
+    "Customer": [ "Opportunity", "Quotation", "Bid", "ProjectApproval", "Contract" ],
+    "Opportunity": [ "Quotation", "Bid", "ProjectApproval", "Contract" ],
+    "Quotation": [ "ProjectApproval" ],
+    "Bid": [ "ProjectApproval" ],
+    "ProjectApproval": [ "Contract" ],
+    "Contract": [ "ContractDetail", "ContractChange", "ContractHandover" ]
+  }
+}
