@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SqlBoTx.Net.ApiService\SqlBoTx.Net.ApiService.csproj" />
+    <ProjectReference Include="..\SqlBoTx.Net.DbManager\SqlBoTx.Net.DbManager.csproj" />
   </ItemGroup>
 
   <ItemGroup>

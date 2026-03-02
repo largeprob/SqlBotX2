@@ -8,7 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\SqlBoTx.Net.Application\SqlBoTx.Net.Application.csproj" />
+    <ProjectReference Include="..\SqlBoTx.Net.Core\SqlBoTx.Net.Core.csproj" />
+    <ProjectReference Include="..\SqlBoTx.Net.Domain.Share\SqlBoTx.Net.Domain.Share.csproj" />
+    <ProjectReference Include="..\SqlBoTx.Net.EFCore\SqlBoTx.Net.EFCore.csproj" />
     <ProjectReference Include="..\SqlBoTx.Net.ServiceDefaults\SqlBoTx.Net.ServiceDefaults.csproj" />
+    <ProjectReference Include="..\SqlBoTx.Net.Share\SqlBoTx.Net.Share.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,11 +21,11 @@
 	  <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="10.0.0" />
 	  <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0-rc.1.25451.107" />
 	  <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.3" />
-	  <PackageReference Include="Microsoft.SemanticKernel" Version="1.67.1" />
-	  <PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.67.1" />
+	  <PackageReference Include="Microsoft.SemanticKernel" Version="1.70.0" />
+	  <PackageReference Include="Microsoft.SemanticKernel.Connectors.OpenAI" Version="1.70.0" />
 	  <PackageReference Include="Microsoft.SemanticKernel.Connectors.SqliteVec" Version="1.67.1-preview" />
 	  <PackageReference Include="Swashbuckle.AspNetCore" Version="10.0.1" />
-	  <PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" Version="1.68.0-preview" />
+	  <PackageReference Include="Microsoft.SemanticKernel.Connectors.Qdrant" Version="1.70.0-preview" />
   </ItemGroup>
 
 </Project>

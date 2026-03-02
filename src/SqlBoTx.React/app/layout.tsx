@@ -1,6 +1,6 @@
 import { Outlet, useLocation, useNavigate } from "react-router"; // 确保导入 useNavigate 用于跳转
 import { Tooltip } from "@heroui/react";
-import { Communication, Github, SeoFolder, TableFile } from "@icon-park/react";
+import { Communication, Github, SeoFolder, SettingConfig, TableFile } from "@icon-park/react";
 import { Bot } from "@/components/icons";
 
 export default function MainLayout() {
@@ -9,17 +9,18 @@ export default function MainLayout() {
 
     // 封装一个简单的导航按钮组件，减少重复代码
     const NavItem = ({ path, icon: Icon, tooltip }: { path: string; icon: any; tooltip: string }) => {
-        const isActive = pathname === path;
+        const firstLevel = "/" + pathname.split('/')[1];
+        const isActive = path === firstLevel;
         return (
             <div
                 onClick={() => navigate(path)}
-                className={`p-2 cursor-pointer rounded-md transition-all duration-200 ease-in-out group
-          ${isActive ? "bg-[#E9E9E9]" : "hover:bg-[#EBEBEB]"}`}
+                className={`p-2 cursor-pointer rounded-md transition-all duration-200 ease-in-out group text-center flex flex-col items-center justify-center
+                ${isActive ? "bg-[#E9E9E9]" : "hover:bg-[#EBEBEB]"}`}
             >
                 <Tooltip color="foreground" content={tooltip} placement="right">
-                    {/* 选中时变黑，未选中灰色 */}
                     <Icon theme="outline" size="24" fill={isActive ? "#000" : "#333"} />
                 </Tooltip>
+                <p className="text-[10px]">{tooltip}</p>
             </div>
         );
     };
@@ -28,16 +29,17 @@ export default function MainLayout() {
         <div className="flex h-screen w-full bg-white text-slate-800 font-sans overflow-hidden">
 
             {/* ==================== 1. 最左侧侧边栏 (Sidebar) ==================== */}
-            <aside className="flex flex-col items-center justify-between w-16 pl-1 pr-1  border-r border-gray-100 bg-gray-50/50 flex-shrink-0 z-20">
+            <aside className="flex flex-col items-center justify-between w-17 pl-1 pr-1  border-r border-gray-100 bg-gray-50/50 flex-shrink-0 z-20">
 
                 {/* Top Section */}
                 <div className="flex flex-col items-center gap-4">
                     <Bot width={48} height={48} />
 
                     <div className="flex flex-col gap-2 mt-2">
-                        <NavItem path="/" icon={Communication} tooltip="会话" />
+                        <NavItem path="/chat" icon={Communication} tooltip="会话" />
                         <NavItem path="/table" icon={TableFile} tooltip="数据表" />
                         <NavItem path="/db" icon={SeoFolder} tooltip="知识库" />
+                        <NavItem path="/baseSetting" icon={SettingConfig} tooltip="基础数据" />
                     </div>
                 </div>
 

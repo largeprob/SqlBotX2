@@ -1,0 +1,30 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(run_test.bat:*)",
+      "Bash(node api_test.js:*)",
+      "Bash(start.bat:*)",
+      "Bash(cmd /c start.bat)",
+      "Bash(node:*)",
+      "Bash(if exist Result rmdir /s /q Result)",
+      "Bash(findstr:*)",
+      "Bash(python:*)",
+      "Skill(generate-api-test-script)",
+      "Bash(ls -la *.test.*)",
+      "WebFetch(domain:localhost)",
+      "Bash(copy:*)",
+      "Skill(api-code-standards)",
+      "Bash(dotnet build:*)",
+      "Bash(dotnet ef migrations add:*)",
+      "Bash(dotnet ef migrations remove:*)",
+      "Skill(frontend-design)",
+      "Bash(pnpm add:*)",
+      "Bash(del:*)",
+      "Bash(npx tsc:*)",
+      "Skill(api-development-guide)",
+      "Skill(frontend-development-guide)",
+      "Bash(pnpm typecheck:*)"
+    ]
+  }
+}

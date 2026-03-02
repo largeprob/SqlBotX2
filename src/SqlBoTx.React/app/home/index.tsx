@@ -43,7 +43,7 @@ export default function Home() {
 
   console.log("当前路径:", pathname);
 
- 
+
 
   return (
     <div>

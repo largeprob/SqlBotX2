@@ -1,0 +1,13 @@
+{
+  "env": {
+    "ANTHROPIC_AUTH_TOKEN": "ak-198ee666d04048ebb2e7ae65934fb938",
+    "ANTHROPIC_BASE_URL": "https://api.routin.ai/",
+    "ANTHROPIC_MODEL": "mimo-v2-flash",
+    "ANTHROPIC_SMALL_FAST_MODEL": "mimo-v2-flash",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "mimo-v2-flash",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "mimo-v2-flash",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "mimo-v2-flash",
+	"CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC":1
+  },
+  "alwaysThinkingEnabled": false
+}

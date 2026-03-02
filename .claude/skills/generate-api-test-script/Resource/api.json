@@ -1,0 +1,928 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "SqlBoTx.Net.ApiService | v1",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://localhost:7534/"
+    }
+  ],
+  "paths": {
+    "/login": {
+      "get": {
+        "tags": [
+          "SqlBoTx.Net.ApiService"
+        ],
+        "operationId": "login",
+        "parameters": [
+          {
+            "name": "account",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "password",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/checkUser": {
+      "get": {
+        "tags": [
+          "SqlBoTx.Net.ApiService"
+        ],
+        "operationId": "checkUser",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/DatabaseSetting/list": {
+      "get": {
+        "tags": [
+          "数据库连接配置管理"
+        ],
+        "summary": "列表（不包含表结构）",
+        "responses": {
+          "200": {
+            "description": "返回数组（不包含表结构）",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListDatabaseConnectionDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListDatabaseConnectionDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListDatabaseConnectionDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DatabaseSetting/list-with-tables": {
+      "get": {
+        "tags": [
+          "数据库连接配置管理"
+        ],
+        "summary": "列表（包含表结构）",
+        "responses": {
+          "200": {
+            "description": "返回数组（包含表结构）",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListDatabaseConnectionDto"
+                  }
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListDatabaseConnectionDto"
+                  }
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ListDatabaseConnectionDto"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DatabaseSetting/add": {
+      "post": {
+        "tags": [
+          "数据库连接配置管理"
+        ],
+        "summary": "新增数据库连接",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDatabaseConnectionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddDatabaseConnectionDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "返回受影响的行数",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "pattern": "^-?(?:0|[1-9]\\d*)$",
+                  "type": [
+                    "integer",
+                    "string"
+                  ],
+                  "format": "int32"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "pattern": "^-?(?:0|[1-9]\\d*)$",
+                  "type": [
+                    "integer",
+                    "string"
+                  ],
+                  "format": "int32"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "pattern": "^-?(?:0|[1-9]\\d*)$",
+                  "type": [
+                    "integer",
+                    "string"
+                  ],
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/DatabaseSetting/update": {
+      "post": {
+        "tags": [
+          "数据库连接配置管理"
+        ],
+        "summary": "更新数据库连接",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDatabaseConnectionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDatabaseConnectionDto"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "返回受影响的行数",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "pattern": "^-?(?:0|[1-9]\\d*)$",
+                  "type": [
+                    "integer",
+                    "string"
+                  ],
+                  "format": "int32"
+                }
+              },
+              "application/json": {
+                "schema": {
+                  "pattern": "^-?(?:0|[1-9]\\d*)$",
+                  "type": [
+                    "integer",
+                    "string"
+                  ],
+                  "format": "int32"
+                }
+              },
+              "text/json": {
+                "schema": {
+                  "pattern": "^-?(?:0|[1-9]\\d*)$",
+                  "type": [
+                    "integer",
+                    "string"
+                  ],
+                  "format": "int32"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/RAGDemo": {
+      "post": {
+        "tags": [
+          "RAGDemo"
+        ],
+        "summary": "Index1",
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    },
+    "/SQLChat": {
+      "post": {
+        "tags": [
+          "SQLChat"
+        ],
+        "summary": "sql对话",
+        "requestBody": {
+          "description": "",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SQLBotMessage"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SQLBotMessage"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/SQLBotMessage"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AddDatabaseConnectionDto": {
+        "required": [
+          "connectionName",
+          "connectionType",
+          "connectionString",
+          "userName",
+          "userPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "connectionName": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "连接名称"
+          },
+          "connectionType": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "连接类型（SQL Server、MySQL、Oracle、PostgreSQL等）",
+                "$ref": "#/components/schemas/ConnectionType"
+              }
+            ]
+          },
+          "connectionString": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "数据库连接"
+          },
+          "userName": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "用户名"
+          },
+          "userPassword": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "密码"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "描述信息"
+          }
+        },
+        "description": "新增数据库连接配置Dto"
+      },
+      "BaseContentBlock": {
+        "required": [
+          "type"
+        ],
+        "type": "object",
+        "anyOf": [
+          {
+            "$ref": "#/components/schemas/BaseContentBlockContentBlockThought"
+          },
+          {
+            "$ref": "#/components/schemas/BaseContentBlockContentBlockText"
+          },
+          {
+            "$ref": "#/components/schemas/BaseContentBlockContentBlockSql"
+          },
+          {
+            "$ref": "#/components/schemas/BaseContentBlockContentBlockEcharts"
+          },
+          {
+            "$ref": "#/components/schemas/BaseContentBlockContentBlockTable"
+          },
+          {
+            "$ref": "#/components/schemas/BaseContentBlockContentBlockFile"
+          }
+        ],
+        "discriminator": {
+          "propertyName": "type",
+          "mapping": {
+            "thought": "#/components/schemas/BaseContentBlockContentBlockThought",
+            "text": "#/components/schemas/BaseContentBlockContentBlockText",
+            "sql": "#/components/schemas/BaseContentBlockContentBlockSql",
+            "echarts": "#/components/schemas/BaseContentBlockContentBlockEcharts",
+            "table": "#/components/schemas/BaseContentBlockContentBlockTable",
+            "file": "#/components/schemas/BaseContentBlockContentBlockFile"
+          }
+        }
+      },
+      "BaseContentBlockContentBlockEcharts": {
+        "properties": {
+          "type": {
+            "enum": [
+              "echarts"
+            ],
+            "type": "string"
+          },
+          "options": {
+            "type": "string"
+          },
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BlockStatus"
+          },
+          "createdAt": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "BaseContentBlockContentBlockFile": {
+        "properties": {
+          "type": {
+            "enum": [
+              "file"
+            ],
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "fileType": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BlockStatus"
+          },
+          "createdAt": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "BaseContentBlockContentBlockSql": {
+        "properties": {
+          "type": {
+            "enum": [
+              "sql"
+            ],
+            "type": "string"
+          },
+          "sql": {
+            "type": "string"
+          },
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BlockStatus"
+          },
+          "createdAt": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "BaseContentBlockContentBlockTable": {
+        "properties": {
+          "type": {
+            "enum": [
+              "table"
+            ],
+            "type": "string"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TableColumn"
+            }
+          },
+          "item": {
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "pagination": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/TablePagination"
+              }
+            ]
+          },
+          "summary": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BlockStatus"
+          },
+          "createdAt": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "BaseContentBlockContentBlockText": {
+        "properties": {
+          "type": {
+            "enum": [
+              "text"
+            ],
+            "type": "string"
+          },
+          "text": {
+            "type": "string",
+            "description": "文本内容"
+          },
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BlockStatus"
+          },
+          "createdAt": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "BaseContentBlockContentBlockThought": {
+        "properties": {
+          "type": {
+            "enum": [
+              "thought"
+            ],
+            "type": "string"
+          },
+          "content": {
+            "type": "string"
+          },
+          "isCollapsed": {
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          "duration": {
+            "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
+            "type": [
+              "null",
+              "number",
+              "string"
+            ],
+            "format": "double"
+          },
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "format": "uuid"
+          },
+          "status": {
+            "$ref": "#/components/schemas/BlockStatus"
+          },
+          "createdAt": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int64"
+          }
+        }
+      },
+      "BlockStatus": {
+        "enum": [
+          "Streaming",
+          "Done",
+          "Error"
+        ]
+      },
+      "ConnectionType": {
+        "type": "integer"
+      },
+      "ListDatabaseConnectionDto": {
+        "type": "object",
+        "properties": {
+          "createdDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "创建时间",
+            "format": "date-time"
+          },
+          "lastModifiedDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "最后修改时间",
+            "format": "date-time"
+          },
+          "connectionId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "连接ID（主键）",
+            "format": "int32"
+          },
+          "connectionName": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "连接名称"
+          },
+          "connectionType": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "连接类型（SQL Server、MySQL、Oracle、PostgreSQL等）",
+                "$ref": "#/components/schemas/ConnectionType"
+              }
+            ]
+          },
+          "connectionString": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "数据库连接字符串"
+          },
+          "userName": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "用户名"
+          },
+          "userPassword": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "密码"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "描述信息"
+          }
+        },
+        "description": "List数据库连接配置Dto"
+      },
+      "Role": {
+        "enum": [
+          "User",
+          "Assistant",
+          "System"
+        ]
+      },
+      "SQLBotMessage": {
+        "type": "object",
+        "properties": {
+          "sessionId": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "会话ID",
+            "format": "uuid"
+          },
+          "id": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "ID",
+            "format": "uuid"
+          },
+          "role": {
+            "description": "角色类型",
+            "$ref": "#/components/schemas/Role"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BaseContentBlock"
+            },
+            "description": "内容块"
+          },
+          "status": {
+            "description": "消息状态",
+            "$ref": "#/components/schemas/SQLBotMessageStatus"
+          },
+          "createdAt": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "时间戳",
+            "format": "int64"
+          },
+          "errorMsg": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "错误信息"
+          }
+        },
+        "description": "SQLBotMessage"
+      },
+      "SQLBotMessageStatus": {
+        "enum": [
+          "Streaming",
+          "Done",
+          "Error"
+        ],
+        "description": "消息状态"
+      },
+      "TableColumn": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "dataIndex": {
+            "type": "string"
+          },
+          "key": {
+            "type": "string"
+          }
+        }
+      },
+      "TablePagination": {
+        "type": "object",
+        "properties": {
+          "current": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "pageSize": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          },
+          "total": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "format": "int32"
+          }
+        }
+      },
+      "UpdateDatabaseConnectionDto": {
+        "required": [
+          "connectionId",
+          "connectionName",
+          "connectionType",
+          "connectionString",
+          "userName",
+          "userPassword"
+        ],
+        "type": "object",
+        "properties": {
+          "connectionId": {
+            "pattern": "^-?(?:0|[1-9]\\d*)$",
+            "type": [
+              "integer",
+              "string"
+            ],
+            "description": "连接ID（主键）",
+            "format": "int32"
+          },
+          "lastModifiedDate": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "最后修改时间",
+            "format": "date-time"
+          },
+          "connectionName": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "连接名称"
+          },
+          "connectionType": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "description": "连接类型（SQL Server、MySQL、Oracle、PostgreSQL等）",
+                "$ref": "#/components/schemas/ConnectionType"
+              }
+            ]
+          },
+          "connectionString": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "数据库连接"
+          },
+          "userName": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "用户名"
+          },
+          "userPassword": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "密码"
+          },
+          "description": {
+            "type": [
+              "null",
+              "string"
+            ],
+            "description": "描述信息"
+          }
+        },
+        "description": "编辑数据库连接配置Dto"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "SqlBoTx.Net.ApiService"
+    },
+    {
+      "name": "数据库连接配置管理"
+    },
+    {
+      "name": "RAGDemo"
+    },
+    {
+      "name": "SQLChat"
+    }
+  ]
+}

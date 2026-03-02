@@ -41,7 +41,6 @@ namespace SqlBoTx.Net.ApiService.Controllers
         }
 
 
-
         /// <summary>
         /// Index1
         /// </summary>

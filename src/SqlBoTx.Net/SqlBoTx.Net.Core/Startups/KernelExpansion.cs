@@ -1,0 +1,146 @@
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.AI;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.SemanticKernel;
+using OpenAI;
+using System;
+using System.ClientModel;
+using System.Collections.Generic;
+using System.Text;
+
+namespace SqlBoTx.Net.Core.Startups
+{
+    public static class KernelExpansion
+    {
+        extension(WebApplicationBuilder builder)
+        {
+            public WebApplicationBuilder AddKernelCompletion()
+            {
+                //注册模型客户端
+                var enableKey = builder.Configuration.GetSection("Models").Get<List<ModleInfo>>();
+                foreach (var model in enableKey)
+                {
+
+                    //var openAIClientCredential = new ApiKeyCredential(model.Key);
+                    //var openAIClientOption = new OpenAIClientOptions
+                    //{
+                    //    Endpoint = new Uri(model.Endpoint),
+                    //};
+                    //builder.Services.AddOpenAIChatClient(model.ModelId, new OpenAIClient(openAIClientCredential, openAIClientOption), model.ModelId);
+
+                    if (model.ModelType == ModelType.Chat)
+                    {
+                        builder.Services.AddOpenAIChatClient(
+                             modelId: model.ModelId,
+                             apiKey: model.Key,
+                             endpoint: new Uri(model.Endpoint),
+                             serviceId: model.ModelId,
+                             httpClient: new HttpClient(new LoggingHandler(new HttpClientHandler()))
+                        );
+
+                        var openAIClientCredential = new ApiKeyCredential(model.Key);
+                        var openAIClientOption = new OpenAIClientOptions
+                        {
+                            Endpoint = new Uri(model.Endpoint),
+
+                        };
+                        builder.Services.AddOpenAIChatCompletion(model.ModelId, new OpenAIClient(openAIClientCredential, openAIClientOption));
+                    }
+
+                    if (model.ModelType == ModelType.Embedding)
+                    {
+                        builder.Services.AddEmbeddingGenerator(_ => new OpenAIClient(new ApiKeyCredential(model.Key), new OpenAIClientOptions
+                        {
+                            Endpoint = new Uri(model.Endpoint)
+                        })
+                        .GetEmbeddingClient(model.ModelId)
+                        .AsIEmbeddingGenerator()
+                        );
+
+                        //                        var httpClient = new HttpClient(new LoggingHandler(new HttpClientHandler()))
+                        //                        {
+                        //                            BaseAddress = new Uri(model.Endpoint)
+                        //                        };
+                        //#pragma warning disable SKEXP0010 // 类型仅用于评估，在将来的更新中可能会被更改或删除。取消此诊断以继续。
+                        //                        builder.Services.AddOpenAIEmbeddingGenerator(
+                        //                             modelId: model.ModelId,
+                        //                             apiKey: model.Key,
+                        //                             serviceId: model.ModelId,
+                        //                             httpClient: new HttpClient(new LoggingHandler(new HttpClientHandler()))
+                        //                        );
+                    }
+                }
+
+                //注册瞬时Kernel
+                builder.Services.AddTransient((serviceProvider) =>
+                {
+                    return new Kernel(serviceProvider);
+                });
+
+                return builder;
+            }
+        }
+    }
+
+    public class LoggingHandler : DelegatingHandler
+    {
+        public LoggingHandler(HttpMessageHandler innerHandler) : base(innerHandler) { }
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            //Console.WriteLine(request.RequestUri);
+            //if (request.Content != null)
+            //{
+            //    // 打印发送的 JSON 内容
+            //    var json = await request.Content.ReadAsStringAsync(cancellationToken);
+            //    Console.WriteLine("=== REQUEST JSON ===");
+            //    Console.WriteLine(json);
+            //    Console.WriteLine("====================");
+            //}
+            return await base.SendAsync(request, cancellationToken);
+        }
+    }
+    public enum ModelType
+    {
+        /// <summary>
+        /// 对话模型
+        /// </summary>
+        Chat = 1,
+        /// <summary>
+        /// 向量模型
+        /// </summary>
+        Embedding = 2,
+    }
+
+    /// <summary>
+    /// 模型
+    /// </summary>
+    public class ModleInfo
+    {
+        /// <summary>
+        /// 模型类型
+        /// </summary>
+        public ModelType ModelType { get; set; }
+
+        /// <summary>
+        /// 模型ID
+        /// </summary>
+        public string ModelId { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Key
+        /// </summary>
+        public string Key { get; set; } = string.Empty;
+
+        /// <summary>
+        /// URL
+        /// </summary>
+        public string Endpoint { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 说明
+        /// </summary>
+        public string Description { get; set; } = string.Empty;
+    }
+}

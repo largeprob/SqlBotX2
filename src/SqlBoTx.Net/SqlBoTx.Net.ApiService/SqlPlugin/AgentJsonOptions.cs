@@ -17,7 +17,7 @@ namespace SqlBoTx.Net.ApiService.SqlPlugin
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = false,
-            DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
         };
 
         /// <summary>

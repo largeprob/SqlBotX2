@@ -5,7 +5,7 @@ import { fetchEventSource, type EventSourceMessage } from '@microsoft/fetch-even
 interface ApiResponse<T = any> {
   code: number
   msg: any
-  data?: T | null
+  data?: T | any
 }
 
 interface ApiRequestConfig {
@@ -65,19 +65,70 @@ class ApiService {
     }
 
     try {
-
       //发送请求
       const response = await fetch(url, {
         ...fetchOptions,
         headers,
         credentials: options.credentials || 'include',
       })
+      if (import.meta.env.MODE === 'development') {
+        console.log(`🌐 API Response: ${response}`)
+      }
 
-      const result = await response.json();
+      const contentType = response.headers.get("content-type")!;
+
+      // 成功响应
+      const isJson = contentType && contentType.includes("application/json");
+      if (response.ok && isJson) {
+        const json = await response.json();
+        return {
+          code: response.status,
+          msg: json,
+          data: json as T
+        }
+      }
+
+      if (response.ok && !isJson) {
+        const text = await response.text();
+        return {
+          code: response.status,
+          msg: text,
+          data: text as T
+        }
+      }
+
+      // 错误相应
+      const errorData: ProblemDetails = await response.json();
+      if (response.status === 400 || response.status === 500) {
+        // 模型验证错误
+        if (errorData.errors) {
+          const messages = Object.values(errorData.errors).flat();
+          return {
+            code: response.status,
+            msg: messages.length > 0 ? messages[messages.length - 1] : errorData.detail,
+            data: errorData.errors
+          }
+        }
+
+        // 业务异常
+        if (errorData.title === "BusinessError") {
+          return {
+            code: response.status,
+            msg: errorData.detail,
+            data: errorData.errors
+          }
+        }
+
+        return {
+          code: response.status,
+          msg: errorData.detail || errorData.title,
+          data: errorData.errors
+        }
+      }
+
       return {
-        code: response.status,
-        msg: result,
-        data: result,
+        code: 500,
+        msg: '服务异常，请稍后重试',
       }
     }
     //异常处理
@@ -92,16 +143,13 @@ class ApiService {
         return {
           code: 500,
           msg: '服务异常，请稍后重试',
-          data: null as any,
         }
       }
 
       return {
         code: 500,
         msg: error?.message || '网络请求失败',
-        data: null as any,
       }
-
     }
   }
 
@@ -121,6 +169,19 @@ class ApiService {
   ): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'POST',
+      body: data ? JSON.stringify(data) : undefined,
+      ...config,
+    })
+  }
+
+  // Delete请求
+  async delete<T>(
+    endpoint: string,
+    data?: any,
+    config?: ApiRequestConfig
+  ): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, {
+      method: 'DELETE',
       body: data ? JSON.stringify(data) : undefined,
       ...config,
     })
@@ -322,3 +383,78 @@ export const {
   checkUser,
   login
 } = apiService
+
+// 表关系相关 API
+export const tableRelationshipApi = {
+  // 获取指定源表的关系列表
+  listBySourceTableId: (sourceTableId: string | number) =>
+    apiService.get(`/TableRelationship/list-by-source-table/${sourceTableId}`),
+
+  // 添加表关系
+  add: (data: {
+    sourceTableId: number;
+    targetTableId: number;
+    relationshipType: number;
+    joinConditions: string;
+  }) => apiService.post('/TableRelationship/add', data),
+
+  // 更新表关系
+  update: (data: {
+    relationshipId: number;
+    relationshipType: number;
+    joinConditions: string;
+  }) => apiService.post('/TableRelationship/update', data),
+
+  // 删除表关系
+  delete: (relationshipId: number) =>
+    apiService.delete(`/TableRelationship/delete/${relationshipId}`),
+}
+
+// 业务指标相关 API
+export const businessMetricApi = {
+  // 获取业务指标列表
+  list: () => apiService.get('/BusinessMetric/list'),
+
+  // 添加业务指标
+  add: (data: {
+    metricName: string;
+    metricCode: string;
+    alias?: string;
+    businessObjectiveId: number;
+    description?: string;
+    status: number;
+    mainTableId: number;
+    mainAlias?: string;
+    expression: string;
+    joinPaths?: Array<{
+      tableId: number;
+      alias: string;
+      joinType: string;
+      onCondition: string;
+    }>;
+  }) => apiService.post('/BusinessMetric/add', data),
+
+  // 更新业务指标
+  update: (data: {
+    id: number;
+    metricName: string;
+    metricCode: string;
+    alias?: string;
+    businessObjectiveId: number;
+    description?: string;
+    status: number;
+    mainTableId: number;
+    mainAlias?: string;
+    expression: string;
+    joinPaths?: Array<{
+      tableId: number;
+      alias: string;
+      joinType: string;
+      onCondition: string;
+    }>;
+  }) => apiService.post('/BusinessMetric/update', data),
+
+  // 删除业务指标
+  delete: (id: number) =>
+    apiService.delete(`/BusinessMetric/delete/${id}`),
+}
