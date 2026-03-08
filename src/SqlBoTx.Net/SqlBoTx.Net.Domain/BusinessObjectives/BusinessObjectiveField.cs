@@ -56,16 +56,23 @@ namespace SqlBoTx.Net.Domain.BusinessObjectives
         [Description("字段说明")]
         public string? Description { get; set; }
 
-        /// <summary>
-        /// 维度标签
-        /// </summary>
-        [Description("维度标签")]
-        public BusinessObjectiveFieldDimensionTag? DimensionTag { get; set; }
 
         /// <summary>
-        /// 度量指标标签
+        /// 业务分析角色
         /// </summary>
-        [Description("度量指标标签")]
-        public BusinessObjectiveFieldMetricTag? MetricTag { get; set; }
+        [Description("业务分析角色")]
+        public BusinessObjectiveFieldBusinesBIRole? BusinesBIRole { get; set; }
+
+        /// <summary>
+        /// 维度层次
+        /// </summary>
+        [Description("维度层次")]
+        public BusinessObjectiveFieldDimensionLayer? DimensionLayer { get; set; }
+
+        /// <summary>
+        /// 度量层次
+        /// </summary>
+        [Description("度量层次")]
+        public BusinessObjectiveFieldMetricLayer? MetricLayer { get; set; }
     }
 }

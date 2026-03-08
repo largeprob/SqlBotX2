@@ -14,47 +14,62 @@ namespace SqlBoTx.Net.Application.Contracts.BusinessObjectives.Embeddings
         [VectorStoreKey]
         public ulong Id { get; set; }
 
+
+        #region 元数据
+    
         /// <summary>
-        /// 元数据
+        /// 主键
         /// </summary>
-        [VectorStoreData]
-        public BusinessObjectiveFieldMataData? MataData { get; set; }
+        [VectorStoreData(IsIndexed = true)]
+        public int MetaDataId { get; set; }
 
         /// <summary>
-        /// 元数据
+        /// 类型：field:普通字段、calculated:指标
+        /// </summary>
+        public string? MetaDataType { get; set; }
+
+        /// <summary>
+        /// 业务角色类型
         /// </summary>
         [VectorStoreData]
-        public BusinessObjectiveMataData? ObjectiveMataData { get; set; }
+        public int? MetaDataBusinesBIRole { get; set; }
+
+        /// <summary>
+        /// 字段名称
+        /// </summary>
+        [VectorStoreData]
+        public string? MetaDataName { get; set; }
+
+        /// <summary>
+        /// 字段说明
+        /// </summary>
+        [VectorStoreData]
+        public string? MetaDataDescription { get; set; }
+
+        #endregion
+
+        /// <summary>
+        /// 归属目标元数据
+        /// </summary>
+        [VectorStoreData(IsIndexed = true)]
+        public int ObjectiveMetaDataId { get; set; }
+
+        /// <summary>
+        /// 归属目标元数据
+        /// </summary>
+        [VectorStoreData]
+        public string? ObjectiveMetaDataName { get; set; }
+
+        /// <summary>
+        /// 归属目标元数据
+        /// </summary>
+        [VectorStoreData]
+        public string? ObjectiveMetaDataDescription { get; set; }
 
         /// <summary>
         /// 字段名向量数据
         /// </summary>
         [VectorStoreVector(Dimensions: 1536, DistanceFunction = DistanceFunction.CosineSimilarity, IndexKind = IndexKind.Hnsw)]
         public ReadOnlyMemory<float>? Embedding { get; set; }
-    }
-
-
-    public class BusinessObjectiveFieldMataData
-    {
-        /// <summary>
-        /// 主键
-        /// </summary>
-        [VectorStoreData(IsIndexed = true)]
-        public int Id { get; set; }
-
-        /// <summary>
-        /// 类型：field:普通字段、calculated:指标
-        /// </summary>
-        public string? Type { get; set; }
-
-        /// <summary>
-        /// 字段名称
-        /// </summary>
-        public string? Name { get; set; }
-
-        /// <summary>
-        /// 字段说明
-        /// </summary>
-        public string? Description { get; set; }
     }
 }

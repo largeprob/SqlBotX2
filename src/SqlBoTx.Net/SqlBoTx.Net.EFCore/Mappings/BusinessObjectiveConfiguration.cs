@@ -62,8 +62,9 @@ namespace SqlBoTx.Net.EFCore.Mappings
             builder.Property(x => x.FieldId).IsRequired();
             builder.Property(x => x.Name).IsRequired();
             builder.Property(x => x.Description);
-            builder.Property(x => x.DimensionTag);
-            builder.Property(x => x.MetricTag);
+            builder.Property(x => x.BusinesBIRole);
+            builder.Property(x => x.DimensionLayer);
+            builder.Property(x => x.MetricLayer);
 
             //设置外键关系
             builder.HasOne(x => x.TableField)

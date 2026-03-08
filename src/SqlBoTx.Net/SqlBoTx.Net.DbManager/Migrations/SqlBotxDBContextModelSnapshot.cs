@@ -216,19 +216,39 @@ namespace SqlBoTx.Net.DbManager.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("BusinesBIRole")
+                        .HasColumnType("int")
+                        .HasColumnName("busines_birole")
+                        .HasComment("业务分析角色");
+
                     b.Property<int>("BusinessObjectiveId")
                         .HasColumnType("int")
                         .HasColumnName("business_objective_id")
                         .HasComment("外键-归属业务模块Id");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("description")
+                        .HasComment("字段说明");
+
+                    b.Property<int?>("DimensionLayer")
+                        .HasColumnType("int")
+                        .HasColumnName("dimension_layer")
+                        .HasComment("维度层次");
 
                     b.Property<int>("FieldId")
                         .HasColumnType("int")
                         .HasColumnName("field_id")
                         .HasComment("表字段ID");
 
+                    b.Property<int?>("MetricLayer")
+                        .HasColumnType("int")
+                        .HasColumnName("metric_layer")
+                        .HasComment("度量层次");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(200)")
+                        .HasColumnType("NVARCHAR(255)")
                         .HasColumnName("name")
                         .HasComment("字段名称");
 
@@ -314,6 +334,12 @@ namespace SqlBoTx.Net.DbManager.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FieldId"));
 
+                    b.Property<string>("ColumnName")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("column_name")
+                        .HasComment("字段名称");
+
                     b.Property<string>("DataType")
                         .IsRequired()
                         .HasColumnType("NVARCHAR(255)")
@@ -332,10 +358,9 @@ namespace SqlBoTx.Net.DbManager.Migrations
                         .HasComment("字段说明");
 
                     b.Property<string>("FieldName")
-                        .IsRequired()
                         .HasColumnType("NVARCHAR(255)")
                         .HasColumnName("field_name")
-                        .HasComment("字段名称");
+                        .HasComment("字段中文名称");
 
                     b.Property<bool?>("IsAvailable")
                         .HasColumnType("bit")
@@ -467,6 +492,16 @@ namespace SqlBoTx.Net.DbManager.Migrations
                         .HasColumnType("int")
                         .HasColumnName("field_count")
                         .HasComment("字段数量");
+
+                    b.Property<string>("Granularity")
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("granularity")
+                        .HasComment("颗粒度描述");
+
+                    b.Property<int?>("GranularityLevel")
+                        .HasColumnType("int")
+                        .HasColumnName("granularity_level")
+                        .HasComment("颗粒度级别");
 
                     b.Property<string>("TableName")
                         .IsRequired()

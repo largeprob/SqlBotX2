@@ -61,7 +61,7 @@ namespace SqlBoTx.Net.ApiService.SqlBotX
         [JsonPropertyName("角色")]
         角色,
 
-        [JsonPropertyName("日期/时间")]
+        [JsonPropertyName("日期时间")]
         日期时间,
 
         [JsonPropertyName("分类")]
@@ -122,8 +122,7 @@ namespace SqlBoTx.Net.ApiService.SqlBotX
     [JsonDerivedType(typeof(FilterCondition), typeDiscriminator: "condition")]
     public abstract class FilterBase
     {
-        [JsonPropertyName("filter_type")]
-        public abstract string FilterType { get; }
+     
     }
 
     /// <summary>
@@ -131,8 +130,6 @@ namespace SqlBoTx.Net.ApiService.SqlBotX
     /// </summary>
     public class FilterGroup : FilterBase
     {
-        public override string FilterType => "group";
-
         [JsonPropertyName("logic")]
         public LogicOperator Logic { get; set; }
 
@@ -145,8 +142,6 @@ namespace SqlBoTx.Net.ApiService.SqlBotX
     /// </summary>
     public class FilterCondition : FilterBase
     {
-        public override string FilterType => "condition";
-
         [JsonPropertyName("field_type")]
         public FieldType FieldType { get; set; }
 
@@ -161,6 +156,9 @@ namespace SqlBoTx.Net.ApiService.SqlBotX
 
         [JsonPropertyName("field_value")]
         public List<string> FieldValue { get; set; } = new();
+
+        [JsonPropertyName("children")]
+        public List<FilterBase>? Children { get; set; }
     }
 
     /// <summary>
@@ -231,6 +229,18 @@ namespace SqlBoTx.Net.ApiService.SqlBotX
         public MetricsFilter? Filters { get; set; }
     }
 
+    public  class BusinessObject
+    {
+        [JsonPropertyName("name")]
+        public string Name { get; set; } = string.Empty;
+
+        [JsonPropertyName("has_full")]
+        public bool HasFull { get; set; } 
+
+        [JsonPropertyName("full_column")]
+        public string FullColumn { get; set; } = string.Empty;
+    }
+
     /// <summary>
     /// 模糊意图结果
     /// </summary>
@@ -245,15 +255,18 @@ namespace SqlBoTx.Net.ApiService.SqlBotX
         [JsonPropertyName("global_filters")]
         public FilterBase? GlobalFilters { get; set; }
 
-
         [JsonPropertyName("dimensions")]
-        public Dimensions?  Dimensions{ get; set; }
+        public Dimensions[]?  Dimensions{ get; set; }
 
         [JsonPropertyName("metrics")]
         public Metrics[]? Metrics { get; set; }
 
-        [JsonPropertyName("select")]
-        public List<SelectField> Select { get; set; } = new();
+        [JsonPropertyName("business_objects")]
+        public BusinessObject[]? BusinessObjects { get; set; } 
+
+        [JsonPropertyName("columns")]
+        public string[]? Columns { get; set; }
+
 
         [JsonPropertyName("limit")]
         public int? Limit { get; set; }

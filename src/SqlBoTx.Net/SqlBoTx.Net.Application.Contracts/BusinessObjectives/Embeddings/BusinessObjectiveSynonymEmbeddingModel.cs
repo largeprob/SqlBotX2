@@ -21,8 +21,20 @@ namespace SqlBoTx.Net.Application.Contracts.BusinessObjectives.Embeddings
         /// <summary>
         /// 归属目标元数据
         /// </summary>
+        [VectorStoreData(IsIndexed = true)]
+        public int ObjectiveMetaDataId { get; set; }
+
+        /// <summary>
+        /// 归属目标元数据
+        /// </summary>
         [VectorStoreData]
-        public BusinessObjectiveMataData? ObjectiveMataData { get; set; }
+        public string? ObjectiveMetaDataName { get; set; }
+
+        /// <summary>
+        /// 归属目标元数据
+        /// </summary>
+        [VectorStoreData]
+        public string? ObjectiveMetaDataDescription { get; set; }
 
         /// <summary>
         /// 向量

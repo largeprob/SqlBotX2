@@ -1,4 +1,5 @@
-﻿using SqlBoTx.Net.Domain.TableFields;
+﻿using SqlBoTx.Net.Domain.Share.Enums;
+using SqlBoTx.Net.Domain.TableFields;
 using SqlBoTx.Net.Domain.TableRelationships;
 using System;
 using System.Collections.Generic;
@@ -51,6 +52,18 @@ namespace SqlBoTx.Net.Domain.TableStructures
         /// </summary>
         [Description("表描述")]
         public string? Description { get; set; }
+
+        /// <summary>
+        /// 颗粒度描述
+        /// </summary>
+        [Description("颗粒度描述")]
+        public string? Granularity { get; set; }
+
+        /// <summary>
+        /// 颗粒度级别
+        /// </summary>
+        [Description("颗粒度级别")]
+        public TableStructureGranularityLevel? GranularityLevel { get; set; }
 
         /// <summary>
         /// 导航属性 - 表字段明细

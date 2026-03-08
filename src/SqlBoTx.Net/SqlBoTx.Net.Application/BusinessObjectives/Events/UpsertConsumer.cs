@@ -43,12 +43,9 @@ namespace SqlBoTx.Net.Application.BusinessObjectives.Events
                     {
                         Id = Guid.CreateVersion7(),
                         MataData = item,
-                        ObjectiveMataData = new BusinessObjectiveMataData
-                        {
-                            Id = command.Id,
-                            Name = command.BusinessName,
-                            Description = command.Synonyms,
-                        },
+                        ObjectiveMetaDataId = command.Id,
+                        ObjectiveMetaDataName = command.BusinessName,
+                        ObjectiveMetaDataDescription = command.Synonyms,
                         Embedding = await _qdrantVectorService.Embedding(item),
                     });
                 }

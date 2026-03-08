@@ -78,7 +78,9 @@ namespace SqlBoTx.Net.DbManager.Migrations
                     table_name = table.Column<string>(type: "NVARCHAR(255)", nullable: false, comment: "表名"),
                     display_name = table.Column<string>(type: "NVARCHAR(255)", nullable: false, comment: "显示名称"),
                     field_count = table.Column<int>(type: "int", nullable: false, comment: "字段数量"),
-                    description = table.Column<string>(type: "NVARCHAR(255)", nullable: false, comment: "表描述")
+                    description = table.Column<string>(type: "NVARCHAR(255)", nullable: false, comment: "表描述"),
+                    granularity = table.Column<string>(type: "NVARCHAR(255)", nullable: true, comment: "颗粒度描述"),
+                    granularity_level = table.Column<int>(type: "int", nullable: true, comment: "颗粒度级别")
                 },
                 constraints: table =>
                 {
@@ -134,12 +136,13 @@ namespace SqlBoTx.Net.DbManager.Migrations
                     field_id = table.Column<int>(type: "int", nullable: false, comment: "主键自增ID")
                         .Annotation("SqlServer:Identity", "1, 1"),
                     table_id = table.Column<int>(type: "int", nullable: false, comment: "外键"),
-                    field_name = table.Column<string>(type: "NVARCHAR(255)", nullable: false, comment: "字段名称"),
+                    column_name = table.Column<string>(type: "NVARCHAR(255)", nullable: false, comment: "字段名称"),
                     data_type = table.Column<string>(type: "NVARCHAR(255)", nullable: false, comment: "字段数据类型"),
                     is_primary_key = table.Column<bool>(type: "bit", nullable: false, defaultValue: false, comment: "是否为主键"),
                     is_nullable = table.Column<bool>(type: "bit", nullable: false, defaultValue: true, comment: "是否允许为空"),
                     is_identity = table.Column<bool>(type: "bit", nullable: false, defaultValue: false, comment: "是否为自增字段"),
                     default_value = table.Column<string>(type: "NVARCHAR(255)", nullable: true, comment: "默认值"),
+                    field_name = table.Column<string>(type: "NVARCHAR(255)", nullable: true, comment: "字段中文名称"),
                     field_description = table.Column<string>(type: "NVARCHAR(255)", nullable: false, comment: "字段说明"),
                     is_available = table.Column<bool>(type: "bit", nullable: true, comment: "是否可用")
                 },
@@ -225,7 +228,11 @@ namespace SqlBoTx.Net.DbManager.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     business_objective_id = table.Column<int>(type: "int", nullable: false, comment: "外键-归属业务模块Id"),
                     field_id = table.Column<int>(type: "int", nullable: false, comment: "表字段ID"),
-                    name = table.Column<string>(type: "NVARCHAR(200)", nullable: false, comment: "字段名称")
+                    name = table.Column<string>(type: "NVARCHAR(255)", nullable: false, comment: "字段名称"),
+                    description = table.Column<string>(type: "NVARCHAR(255)", nullable: true, comment: "字段说明"),
+                    busines_birole = table.Column<int>(type: "int", nullable: true, comment: "业务分析角色"),
+                    dimension_layer = table.Column<int>(type: "int", nullable: true, comment: "维度层次"),
+                    metric_layer = table.Column<int>(type: "int", nullable: true, comment: "度量层次")
                 },
                 constraints: table =>
                 {

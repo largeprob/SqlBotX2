@@ -23,6 +23,8 @@ namespace SqlBoTx.Net.EFCore.Mappings
             builder.Property(x => x.DisplayName).IsRequired().HasColumnType("NVARCHAR(255)");
             builder.Property(x => x.FieldCount).IsRequired();
             builder.Property(x => x.Description).IsRequired().HasColumnType("NVARCHAR(255)");
+            builder.Property(x => x.Granularity);
+            builder.Property(x => x.GranularityLevel);
 
             //设置外键关系
             builder.HasMany(x => x.TableFields)

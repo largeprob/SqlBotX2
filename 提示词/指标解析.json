@@ -1,0 +1,113 @@
+{
+    "metrics": [
+        {
+            "name": "指标名称",
+            "type": "普通指标",
+            "expression": "指标计算表达式",
+            "alias": "指标别名",
+            "dependencies": [
+                {
+                    "time": "t1",
+                    "metric_id": "t1",
+                    "alias": "previous_sales",
+                    "cycle": "Current"
+                }
+            ],
+            "having_filters": {
+                "and": [
+                    {
+                        "name": "年份",
+                        "type": "显式/隐式",
+                        "tag": "字段标签",
+                        "operator": "映射运算符",
+                        "value": [],
+                        "or": [],
+                        "and": []
+                    }
+                ],
+                "or": [
+                    {
+                        "name": "年份",
+                        "type": "显式/隐式",
+                        "tag": "字段标签",
+                        "operator": "映射运算符",
+                        "value": []
+                    }
+                ]
+            }
+        },
+        {
+            "name": "指标名称",
+            "type": "普通指标",
+            "expression": "指标计算表达式",
+            "alias": "指标别名",
+            "dependencies": [
+                {
+                    "metric_id": "m1",
+                    "alias": "previous_sales",
+                    "cycle": "Current"
+                }
+            ]
+        },
+        {
+            "name": "指标名称",
+            "type": "指标类型（周期对比性指标/普通指标）",
+            "expression": "指标计算表达式",
+            "alias": "指标别名",
+            "dependencies": [
+                {
+                    "metric_id": "m1",
+                    "alias": "previous_sales",
+                    "cycle": "Current"
+                }
+            ]
+        }
+    ],
+    "split_metrics": [
+        {
+            "name": "分解指标名称",
+            "expression": "分解指标计算表达式",
+            "dependencies": [
+                {
+                    "metric_id": "m1",
+                    "alias": "previous_sales",
+                    "time_shift": "-1y"
+                }
+            ]
+        }
+    ],
+    "time_ranges": [
+        {
+            "name": "时间范围名称",
+            "alias": "t1",
+            "type": "显式/隐式",
+            "tag": "字段标签",
+            "operator": "映射运算符",
+            "value": []
+        }
+    ],
+    "dependent_dims": [
+        "维度名称1",
+        "维度名称2"
+    ],
+    "having_filters": {
+        "and": [
+            {
+                "name": "年份",
+                "type": "显式/隐式",
+                "tag": "字段标签",
+                "operator": "映射运算符",
+                "value": [],
+                "or": {},
+                "and": {}
+            }
+        ],
+        "or": {
+            "name": "年份",
+            "type": "显式/隐式",
+            "tag": "字段标签",
+            "operator": "映射运算符",
+            "value": []
+        }
+    }
+}

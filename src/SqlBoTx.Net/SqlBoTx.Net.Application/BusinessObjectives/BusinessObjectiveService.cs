@@ -1,4 +1,5 @@
 using Mapster;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.AI;
 using Microsoft.SemanticKernel;
 using SqlBoTx.Net.Application.Contracts.BusinessObjectives;
@@ -8,6 +9,7 @@ using SqlBoTx.Net.Domain;
 using SqlBoTx.Net.Domain.BusinessObjectives;
 using SqlBoTx.Net.Domain.BusinessObjectives.Events;
 using SqlBoTx.Net.Domain.TableRelationships;
+using Weasel.SqlServer.Tables;
 using Wolverine;
 using Wolverine.EntityFrameworkCore;
 
@@ -59,6 +61,34 @@ namespace SqlBoTx.Net.Application.BusinessObjectives
         }
 
         /// <summary>
+        /// List all table structures with fields
+        /// </summary>
+        /// <returns></returns>
+        public async Task<List<ListBusinessObjectiveDto>> ListByIdAsync(int[] ids)
+        {
+            var list = await _businessObjectiveRepository.ListAsync(q => q.Where(x => ids.Contains(x.Id)).Include(x => x.DependencyTables));
+
+            //表
+            var allTableIds = list.SelectMany(x => x.DependencyTables!).Select(x => x.TableId).Distinct().ToList();
+            var tableList = (await _tableStructureRepository.ListAsync((p) => p.Where(x => allTableIds.Contains(x.TableId))))
+            .Adapt<List<ListTableStructureDto>>().ToDictionary(x => x.TableId);
+
+           
+            return list.Select(x =>
+            {
+                //var dto = new ListBusinessObjectiveDto { Id = x.Id };
+                var dto = x.Adapt<ListBusinessObjectiveDto>();
+                if (x.DependencyTables != null && x.DependencyTables.Count > 0) 
+                {
+                    dto.DependencyTables = dto.DependencyTables
+                    .Where(t => tableList.ContainsKey(t.TableId))
+                    .Select(t => tableList[t.TableId]).ToList();
+                }
+                return dto;
+            }).ToList();
+        }
+
+        /// <summary>
         /// Add a new business objective
         /// </summary>
         /// <param name="input"></param>
@@ -106,7 +136,6 @@ namespace SqlBoTx.Net.Application.BusinessObjectives
             await _businessObjectiveRepository.DeleteAsync(id);
             await _bus.PublishAsync(new Delete(id));
         }
-
 
         /// <summary>
         /// Delete a business objective

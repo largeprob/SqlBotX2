@@ -9,6 +9,7 @@ using Microsoft.SemanticKernel.ChatCompletion;
 using Microsoft.SemanticKernel.Connectors.OpenAI;
 using OpenAI;
 using OpenAI.Chat;
+using OpenTelemetry.Metrics;
 using Qdrant.Client.Grpc;
 using SqlBoTx.Net.ApiService.Dto;
 using SqlBoTx.Net.ApiService.SqlBotX;
@@ -24,6 +25,7 @@ using System;
 using System.ClientModel;
 using System.Text;
 using System.Text.Json;
+using static System.Runtime.InteropServices.Marshalling.IIUnknownCacheStrategy;
 
 namespace SqlBoTx.Net.ApiService.Controllers
 {
@@ -125,76 +127,178 @@ namespace SqlBoTx.Net.ApiService.Controllers
                 // 语义粗筛
                 var semanticElementsResult = await _chatXService.Step2Async(userInput);
 
+                #region 召回业务域  1000%没错
+                // 召回业务域（宽表）
+                var domains = new List<BusinessObjectiveEmbeddingModel>();
+                foreach (var item in semanticElementsResult.BusinessObjects)
+                {
+                    // top K
+                    var vc =
+                    await _qdrantVectorService.SearchAsync<ulong, BusinessObjectiveEmbeddingModel>("business_objective", item.Name, top: 5);
+                    if (vc.Count() == 0)
+                    {
+                        _logger.LogError("抱歉，系统中没有找到与‘{0}’对应的模块信息", item);
+                        return;
+                    }
+                    domains.AddRange(vc.Select(x => x.Record));
+                }
 
-                // 指标候选
-                string selectMetricPrompt = @"
+                // 数据库
+                var domainsOfDb = await _businessObjectiveService.ListByIdAsync(domains.Select(x => x.MetaDataId).ToArray());
+
+                //LLM 召回
+                var selectDomainsPrompt = @"
+# 业务域识别系统 (Business Domain Recognition System)
+
+# Role
+你是一个运行在SQLBotX中智能助手，你所处的阶段是 `识别业务域`以缩小查询范围。你的上一个阶段是 `向量业务域召回`，你的下一个阶段是：在你本次选择的业务域范围内进行 `向量指标召回`。
+现在你将负责根据用户的自然语言查询，从给定的业务域列表中选择最相关的业务域。业务域是业务主题的逻辑分组，每个域包含相关的数据表。
+
+# 用户原始查询
+""{userInput}""
+
+# 业务域列表
+{domainsInfo}
+
+# Core
+1. 仔细阅读用户查询，理解其业务意图。
+2. 从上述业务域列表中，选择与本次用户查询最相关的**1个或多个**业务域。
+3. 如果查询明显涉及多个业务域，可以列出多个域，并按相关性从高到低排序。
+4. 如果无法从列表中找到相关业务域，请在 `reason` 中解释为什么。
+5. 只从给定列表中选择，不要创建新的业务域名称。
+
+## Schema Definition
+你的输出 **必须** 严格遵守此 JSON 结构。
+```json
+{
+    ""reason"":""思考内容/解释为什么"",    
+    ""selected_domains"":[
+    {
+      ""domains_id"": ""业务域唯一标识(Number)"",
+      ""domains_name"": ""业务域名称"",
+      ""selection_reason"": ""选择此业务域的理由""
+    }] | []
+}
+```
+";
+                string domainStr = string.Empty;
+                for (int i = 0; i < domainsOfDb.Count; i++)
+                {
+                    var domain = domainsOfDb[i];
+                    var tableInfo = (domain.DependencyTables?.Any() == true)
+                    ? string.Join("，", domain.DependencyTables.Select(x => $"{x.TableName}({x.Description})({x.Granularity})({x.GranularityLevelStr})"))
+                    : null;
+                    domainStr += $"{i + 1}. 业务域名称: {domain.BusinessName}";
+                    domainStr += $"   - 唯一标识: {domain.Id}";
+                    domainStr += $"   - 说明: {domain.Description}";
+                    domainStr += $"   - 近义词: {domain.Synonyms}";
+                    if (!string.IsNullOrEmpty(tableInfo))
+                    {
+                        domainStr += $"   - 关联表: {tableInfo}\n";
+                    }
+                }
+                var domainSelectionResult = await _chatXService.SelectDomainAsync(selectDomainsPrompt);
+
+                // LLM Result
+                if (domainSelectionResult.SelectedDomains.Count == 0)
+                {
+                    _logger.LogError(domainSelectionResult.Reason);
+                    return;
+                }
+                var selectedDomainIds = domainSelectionResult.SelectedDomains.Select(x => x.DomainsId).ToArray();
+                var selectedDomains = domainSelectionResult.SelectedDomains.Select(x => new 
+                {
+                    Id = x.DomainsId,
+                    Name = x.DomainsName,
+                    HasFull = true
+                });
+                #endregion
+
+                #region LLM进行指标解析
+                // 指标字段、计算方式（标准指标计算方式(_，自定义指标计算方式）
+                // 原子指标、复合指标
+                #endregion
+
+
+                #region 召回字段
+                var fullColumns = semanticElementsResult.BusinessObjects.Where(x=>x.HasFull).Select(x => x.FullColumn);
+                var metricColumns = semanticElementsResult.Metrics.Select(x => x.Name);
+                var columns = semanticElementsResult.Columns.Where(x => !fullColumns.Contains(x) && !metricColumns.Contains(x));
+                var dbColumns = new List<dynamic>();
+                foreach (var column in columns)
+                {
+                    var field_vc = (await _qdrantVectorService.SearchAsync<ulong, BusinessObjectiveFieldEmbeddingModel>("business_objective_field", column,
+                        filter: x => selectedDomainIds.Contains(x.ObjectiveMetaDataId))).MaxBy(x => x.Score);
+                    if (field_vc == null) {
+                        _logger.LogError("未找到字段{clomun}", column);
+                        continue;
+                    }
+
+                    //如果是全量字段，且所属业务域未被选中，则不予召回
+                    if (selectedDomains.Where(x => x.HasFull == true && x.Id == field_vc.Record.ObjectiveMetaDataId).Count() > 0)
+                    {
+                        continue;
+                    }
+
+                    dbColumns.Add(new
+                    {
+                        Id = field_vc.Record.MetaDataId,
+                        Name = field_vc.Record.MetaDataName,
+                        DomainId = field_vc.Record.ObjectiveMetaDataId,
+                        DomainName = domainsOfDb.Where(x => x.Id == field_vc.Record.ObjectiveMetaDataId).Select(x => x.BusinessName).FirstOrDefault()
+                    });
+                }
+                #endregion
+
+                #region 召回指标
+                var dbMetrics = new List<dynamic>();
+                // 指标 召回
+                if (semanticElementsResult.Metrics != null && semanticElementsResult.Metrics.Length >= 0)
+                {
+                    // 是不是通用指标
+
+
+                    var selectMetricPrompt = new StringBuilder(@$"
 # Role
 你是一个智能数据查询助手。你的任务是根据用户的原始查询、已提取的指标，以及每个指标对应的候选物理字段信息，为**每个指标**选择一个最合适的字段。
 
 # 上下文信息
 
 ## 用户原始查询
-""{user_query}""
+""{userInput}""
 
 ## 指标信息
-1. 指标名称：{metric_name}
-    - `相似度评分`:
-    - `候选字段`: 
-        - `字段唯一标识`:  
-        - `物理名称`:  
-        - `说明`:  
-    - `所在业务域`: 
-        - `名称`:  
-        - `说明`:  
-        - `similarity_score`: 
-";
-                if (semanticElementsResult.Metrics != null)
-                {
-                    foreach (var metric in semanticElementsResult.Metrics)
+");
+                    for (int i = 0; i < semanticElementsResult.Metrics.Length; i++)
                     {
-                        var f = semanticElementsResult.Select.FirstOrDefault(x => x.What.Contains(metric.Name));
-                        if (f == null)
-                        {
-                            _logger.LogError("抱歉，系统中没有找到与‘{0}’对应的模块信息", f.From);
-                            return;
-                        }
+                        var metric = semanticElementsResult.Metrics[i];
 
-                        // 业务域召回
-                        var objective_vc = (await _qdrantVectorService.SearchAsync<ulong, BusinessObjectiveEmbeddingModel>("business_objective", f.From, top: 5));
-                        if (objective_vc == null || objective_vc.Count() <= 0)
-                        {
-                            _logger.LogError("抱歉，系统中没有找到与‘{0}’对应的模块信息", f.From);
-                            return;
-                        }
+                        // TODO 判断是否为自定义指标
 
-                        var objectiveIds = objective_vc.Select(x => x.Record.MataData.Id).ToList();
+                        var objectiveIds = domains.Select(x => x.MetaDataId).ToList();
                         var field_vc = (await _qdrantVectorService.SearchAsync<ulong, BusinessObjectiveFieldEmbeddingModel>("business_objective_field", metric.Name,
-                        filter: x => objectiveIds.Contains(x.ObjectiveMataData.Id))).Where(x => x.Score > 0.6);
+                        filter: x => objectiveIds.Contains(x.ObjectiveMetaDataId) && x.MetaDataBusinesBIRole == 3)).Where(x => x.Score > 0.6).ToList();
                         if (field_vc == null || field_vc.Count() <= 0)
                         {
-                            _logger.LogError("抱歉，系统中没有找到与‘{0}’相关的度量内容", f.From);
+                            _logger.LogError("抱歉，系统中没有找到与‘{0}’相关的度量内容", metric.Name);
                             return;
                         }
 
-                        for (int i = 0; i < field_vc.Count(); i++)
+                        selectMetricPrompt.AppendLine($"{i + 1}. 指标名称：{metric.Name}");
+                        for (int j = 0; j < field_vc.Count(); j++)
                         {
-                            var item = field_vc.ElementAt(i);
-                            selectMetricPrompt += @$"
-{i++}. 指标名称：{metric.Name}
-    - `相似度评分`:{item.Score}
-    - `候选字段`: 
-        - `字段唯一标识`:   {item.Record.MataData.Id}
-        - `物理名称`:   {item.Record.MataData.Name}
-        - `说明`:   {item.Record.MataData.Description}
-    - `所在业务域`: 
-        - `名称`:   {item.Record.ObjectiveMataData.Name}
-        - `说明`:   {item.Record.ObjectiveMataData.Description}
-";
+                            var item = field_vc.ElementAt(j);
+                            selectMetricPrompt.AppendLine($"    - `候选字段`:");
+                            selectMetricPrompt.AppendLine($"        - `相似度评分`:{item.Score}");
+                            selectMetricPrompt.AppendLine($"        - `唯一标识`:{item.Record.MetaDataId}");
+                            selectMetricPrompt.AppendLine($"        - `物理名称`:{item.Record.MetaDataName}");
+                            selectMetricPrompt.AppendLine($"        - `说明`:{item.Record.MetaDataDescription}");
+                            selectMetricPrompt.AppendLine($"        - `字段业务域`: ");
+                            selectMetricPrompt.AppendLine($"            - `名称`:{item.Record.ObjectiveMetaDataName}");
+                            selectMetricPrompt.AppendLine($"            - `说明`:{item.Record.ObjectiveMetaDataDescription}");
                         }
-
                     }
-                }
-                selectMetricPrompt += @"
+                    selectMetricPrompt.AppendLine(@"
 # Core
 1. 对于每个指标，首先分析它的名称和含义，理解用户的查询意图。
 2. 然后，评估每个候选字段与指标的相关性，考虑相似度评分、字段说明、以及字段所在业务域的信息。
@@ -203,19 +307,33 @@ namespace SqlBoTx.Net.ApiService.Controllers
 ## Schema Definition
 你的输出 **必须** 严格遵守此 JSON 结构:
 ```json
-[{
-  ""metric_name"": ""指标名称"",
-  ""selected_field_Id"": ""字段唯一标识"",
-  ""selection_reason"": ""选择理由""
-}]
+{
+    ""reason"":""思考内容/解释为什么"",
+    ""selected_metrics"":[
+    {
+      ""metric_name"": ""指标名称"",
+      ""selected_field_Id"": ""字段唯一标识"",
+      ""is_selected"": ""true/fasle"",
+      ""selection_reason"": ""成功理由/失败理由""
+    }]
+}
 ```
-";
-                await _chatXService.Step2Async(selectMetricPrompt);
+");
+                    var metricSelectionResult = await _chatXService.SelectMetricAsync(selectMetricPrompt.ToString());
+                    var failedMetrics = metricSelectionResult.SelectedMetrics.Where(x => x.IsSelected == false).ToList();
+
+                    // TODO 未找到的指标
+                    _logger.LogError("未找到此指标信息，{0}", string.Join(",", failedMetrics.Select(x => x.MetricName)));
+                    return;
+                }
+
+                #endregion
 
 
 
 
 
+                // 字段召回
 
                 var businessVectorItems = new List<BusinessVectorItem>();
 
@@ -234,7 +352,7 @@ namespace SqlBoTx.Net.ApiService.Controllers
                     }
 
                     var body_record = body_vc.Record;
-                    var businessObjective = new BusinessVectorItem() { ObjectiveId = body_vc.Record.MataData.Id };
+                    var businessObjective = new BusinessVectorItem() { ObjectiveId = body_vc.Record.MetaDataId };
 
                     // 字段召回
                     foreach (var field in item.What)
@@ -250,13 +368,13 @@ namespace SqlBoTx.Net.ApiService.Controllers
 
                         // 限定业务域-召回
                         var field_vc = (await _qdrantVectorService.SearchAsync<ulong, BusinessObjectiveFieldEmbeddingModel>("business_objective_field", field,
-                        filter: x => x.ObjectiveMataData.Id == body_vc.Record.MataData.Id)).Where(x => x.Score > 0.6).MaxBy(x => x.Score);
+                        filter: x => x.ObjectiveMetaDataId == body_vc.Record.MetaDataId)).Where(x => x.Score > 0.6).MaxBy(x => x.Score);
                         if (field_vc != null && businessObjective.Columns.Count(x => x.FieldName == "ALL") <= 0)
                         {
-                            var record = field_vc.Record.MataData;
+                       
                             businessObjective.Columns.Add(new ColumnVectorMatch
                             {
-                                Id = field_vc.Record.MataData.Id,
+                                Id = field_vc.Record.MetaDataId,
                                 FieldName = field,
                             });
                             continue;
@@ -271,9 +389,9 @@ namespace SqlBoTx.Net.ApiService.Controllers
                         int? selectedRecordId = (broad_result1, broad_result2) switch
                         {
                             (null, null) => null,
-                            (not null, null) => broad_result1.Record.MataData.Id,
-                            (null, not null) => broad_result2.Record.ObjectiveMataData.Id,
-                            (not null, not null) => broad_result1.Score >= broad_result2.Score ? (int)broad_result1.Record.Id : broad_result2.Record.ObjectiveMataData.Id
+                            (not null, null) => broad_result1.Record.MetaDataId,
+                            (null, not null) => broad_result2.Record.ObjectiveMetaDataId,
+                            (not null, not null) => broad_result1.Score >= broad_result2.Score ? (int)broad_result1.Record.Id : broad_result2.Record.ObjectiveMetaDataId
                         };
                         if (selectedRecordId != null)
                         {
@@ -312,18 +430,18 @@ namespace SqlBoTx.Net.ApiService.Controllers
                             if (fields.Count() > 1)
                             {
                                 //TODO 歧义字段  倒排索引加权重/业务域血缘
-                                _logger.LogWarning("字段{0}存在歧义，召回了多个相似字段，分别是{1}，需要后续通过倒排索引加权重或者业务域血缘等方式进行筛选", field, string.Join(", ", fields.Select(x => x.Record.MataData.Name)));
+                                _logger.LogWarning("字段{0}存在歧义，召回了多个相似字段，分别是{1}，需要后续通过倒排索引加权重或者业务域血缘等方式进行筛选", field, string.Join(", ", fields.Select(x => x.Record.MetaDataName)));
 
                             }
                             else
                             {
                                 var vector_field = fields.FirstOrDefault();
-                                var thisBody = businessVectorItems.Find(x => x.ObjectiveId == vector_field.Record.ObjectiveMataData.Id);
+                                var thisBody = businessVectorItems.Find(x => x.ObjectiveId == vector_field.Record.ObjectiveMetaDataId);
                                 if (thisBody != null)
                                 {
                                     thisBody.Columns.Add(new ColumnVectorMatch
                                     {
-                                        Id = vector_field.Record.MataData.Id,
+                                        Id = vector_field.Record.MetaDataId,
                                         FieldName = field
                                     });
                                 }
@@ -332,10 +450,10 @@ namespace SqlBoTx.Net.ApiService.Controllers
                                     businessVectorItems.Add(new BusinessVectorItem
                                     {
 
-                                        ObjectiveId = vector_field.Record.ObjectiveMataData.Id,
+                                        ObjectiveId = vector_field.Record.ObjectiveMetaDataId,
                                         Columns = new List<ColumnVectorMatch> { new ColumnVectorMatch
                                     {
-                                         Id = vector_field.Record.MataData.Id,
+                                         Id = vector_field.Record.MetaDataId,
                                          FieldName = field
                                     }}
                                     });
@@ -362,14 +480,14 @@ namespace SqlBoTx.Net.ApiService.Controllers
                     if (condition.FieldType == SqlBotX.FieldType.显式)
                     {
                         var field_vc = (await _qdrantVectorService.SearchAsync<ulong, BusinessObjectiveFieldEmbeddingModel>("business_objective_field", condition.FieldName,
-                        filter: x => domainIds.Contains(x.ObjectiveMataData.Id))).Where(x => x.Score > 0.6).MaxBy(x => x.Score);
+                        filter: x => domainIds.Contains(x.ObjectiveMetaDataId))).Where(x => x.Score > 0.6).MaxBy(x => x.Score);
 
-                        var thisBody = businessVectorItems.Find(x => x.ObjectiveId == field_vc.Record.ObjectiveMataData.Id);
+                        var thisBody = businessVectorItems.Find(x => x.ObjectiveId == field_vc.Record.ObjectiveMetaDataId);
                         if (thisBody != null)
                         {
                             thisBody.Columns.Add(new ColumnVectorMatch
                             {
-                                Id = field_vc.Record.MataData.Id,
+                                Id = field_vc.Record.MetaDataId,
                                 FieldName = condition.FieldName,
                             });
                         }
@@ -377,11 +495,11 @@ namespace SqlBoTx.Net.ApiService.Controllers
                         {
                             businessVectorItems.Add(new BusinessVectorItem
                             {
-                                ObjectiveId = field_vc.Record.ObjectiveMataData.Id,
+                                ObjectiveId = field_vc.Record.ObjectiveMetaDataId,
                                 Columns = new List<ColumnVectorMatch> {
                                     new ColumnVectorMatch
                                     {
-                                        Id = field_vc.Record.MataData.Id,
+                                        Id = field_vc.Record.MetaDataId,
                                         FieldName = condition.FieldName,
                                     }
                              }
@@ -405,15 +523,6 @@ namespace SqlBoTx.Net.ApiService.Controllers
 
                 //LLM 精细召回
             }
-
-
-
-
-
-
-
-
-
 
 
             //var splitTaskResult = await _chatXService.SplitTaskAsync(userInput);

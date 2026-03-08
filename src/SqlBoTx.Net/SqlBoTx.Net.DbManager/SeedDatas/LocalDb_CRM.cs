@@ -6,6 +6,7 @@ using SqlBoTx.Net.Application.Vectors;
 using SqlBoTx.Net.Domain.BusinessObjectives;
 using SqlBoTx.Net.Domain.DatabaseConnections;
 using SqlBoTx.Net.Domain.Share.Enums;
+using SqlBoTx.Net.Domain.Share.Enums.BusinessObjective;
 using SqlBoTx.Net.Domain.Share.TableRelationships;
 using SqlBoTx.Net.Domain.TableFields;
 using SqlBoTx.Net.Domain.TableRelationships;
@@ -86,12 +87,9 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                 {
                     Id = (ulong)objective.Id,
                     Embedding = await _vectorService.Embedding(objective.BusinessName),
-                    MataData = new BusinessObjectiveMataData
-                    {
-                        Id = objective.Id,
-                        Name = objective.BusinessName,
-                        Description = objective.Description
-                    }
+                    MetaDataId = objective.Id,
+                    MetaDataName = objective.BusinessName,
+                    MetaDataDescription = objective.Description
                 });
 
                 //近义词向量
@@ -105,12 +103,9 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                             Id = Guid.CreateVersion7(),
                             Embedding = await _vectorService.Embedding(synonymsArr[i]),
                             MataData = synonymsArr[i],
-                            ObjectiveMataData = new BusinessObjectiveMataData
-                            {
-                                Id = objective.Id,
-                                Name = objective.BusinessName,
-                                Description = objective.Description,
-                            }
+                            ObjectiveMetaDataId = objective.Id,
+                            ObjectiveMetaDataName = objective.BusinessName,
+                            ObjectiveMetaDataDescription = objective.Description,
                         });
                     }
                 }
@@ -121,19 +116,17 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                     insertVectorBusinessObjectivesField.Add(new BusinessObjectiveFieldEmbeddingModel
                     {
                         Id = (ulong)field.Id,
-                        MataData = new BusinessObjectiveFieldMataData
-                        {
-                            Id = field.Id,
-                            Type = "field",
-                            Name = field.Name,
-                            Description = field.Description,
-                        },
-                        ObjectiveMataData = new BusinessObjectiveMataData
-                        {
-                            Id = objective.Id,
-                            Name = objective.BusinessName,
-                            Description = objective.Description,
-                        }
+                        Embedding = await _vectorService.Embedding(field.Name),
+
+                        MetaDataId = field.Id,
+                        MetaDataType = "field",
+                        MetaDataBusinesBIRole = (int)(field.BusinesBIRole ?? 0),
+                        MetaDataName = field.Name,
+                        MetaDataDescription = field.Description,
+
+                        ObjectiveMetaDataId = objective.Id,
+                        ObjectiveMetaDataName = objective.BusinessName,
+                        ObjectiveMetaDataDescription = objective.Description,
                     });
                 }
             }
@@ -151,7 +144,9 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                 ConnectionId = ConnectionId,
                 TableName = "Organization",
                 DisplayName = "组织架构表",
-                Description = "组织架构表，存储公司组织架构信息，支持多级组织管理"
+                Description = "组织架构表，存储公司组织架构信息，支持多级组织管理",
+                Granularity = "每个组织单元(公司/事业部)",
+                GranularityLevel =  TableStructureGranularityLevel.Dimension,
             };
 
             var fields = new List<TableField>
@@ -195,7 +190,9 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                 ConnectionId = ConnectionId,
                 TableName = "UserInfo",
                 DisplayName = "用户信息表",
-                Description = "用户信息表，存储系统用户数据"
+                Description = "用户信息表，存储系统用户数据",
+                Granularity = "每个系统用户",
+                GranularityLevel = TableStructureGranularityLevel.Dimension,
             };
 
             var fields = new List<TableField>
@@ -240,7 +237,9 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                 ConnectionId = ConnectionId,
                 TableName = "Department",
                 DisplayName = "部门表",
-                Description = "部门表，存储公司部门组织架构信息，支持多级部门管理"
+                Description = "部门表，存储公司部门组织架构信息，支持多级部门管理",
+                Granularity = "每个部门",
+                GranularityLevel = TableStructureGranularityLevel.Dimension,
             };
 
             var fields = new List<TableField>
@@ -286,7 +285,9 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                 ConnectionId = ConnectionId,
                 TableName = "Product",
                 DisplayName = "产品信息表",
-                Description = "产品信息表，存储所有可销售的产品数据"
+                Description = "产品信息表，存储所有可销售的产品数据",
+                Granularity = "每个产品",
+                GranularityLevel = TableStructureGranularityLevel.Dimension,
             };
 
             var fields = new List<TableField>
@@ -329,7 +330,9 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                 ConnectionId = ConnectionId,
                 TableName = "Customer",
                 DisplayName = "客户信息表",
-                Description = "客户信息表，统一管理公海客户和正式客户"
+                Description = "客户信息表，统一管理公海客户和正式客户",
+                Granularity = "每个客户",
+                GranularityLevel = TableStructureGranularityLevel.Dimension,
             };
 
             var fields = new List<TableField>
@@ -383,7 +386,9 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                 ConnectionId = ConnectionId,
                 TableName = "Opportunity",
                 DisplayName = "商机信息表",
-                Description = "商机信息表，记录销售机会的全过程"
+                Description = "商机信息表，记录销售机会的全过程",
+                Granularity = "每个商机",
+                GranularityLevel = TableStructureGranularityLevel.Fact,
             };
 
             var fields = new List<TableField>
@@ -441,7 +446,9 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                 ConnectionId = ConnectionId,
                 TableName = "Quotation",
                 DisplayName = "销售报价表",
-                Description = "销售报价表，记录普通项目的报价信息"
+                Description = "销售报价表，记录普通项目的报价信息",
+                Granularity = "每个报价单",
+                GranularityLevel = TableStructureGranularityLevel.Fact,
             };
 
             var fields = new List<TableField>
@@ -498,7 +505,9 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                 ConnectionId = ConnectionId,
                 TableName = "Bid",
                 DisplayName = "销售投标表",
-                Description = "销售投标表，记录招投标项目的投标信息"
+                Description = "销售投标表，记录招投标项目的投标信息",
+                Granularity = "每个投标项目",
+                GranularityLevel = TableStructureGranularityLevel.Fact,
             };
 
             var fields = new List<TableField>
@@ -564,7 +573,9 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                 ConnectionId = ConnectionId,
                 TableName = "ProjectApproval",
                 DisplayName = "销售立项表",
-                Description = "销售立项表，记录内部评审和立项信息"
+                Description = "销售立项表，记录内部评审和立项信息",
+                Granularity = "每个立项申请",
+                GranularityLevel = TableStructureGranularityLevel.Fact,
             };
 
             var fields = new List<TableField>
@@ -629,7 +640,9 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                 ConnectionId = ConnectionId,
                 TableName = "Contract",
                 DisplayName = "销售合同表",
-                Description = "销售合同表，记录正式签订的合同信息"
+                Description = "销售合同表，记录正式签订的合同信息",
+                Granularity = "每个合同",
+                GranularityLevel = TableStructureGranularityLevel.Fact,
             };
             var fields = new List<TableField>
 {
@@ -695,7 +708,9 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                 ConnectionId = ConnectionId,
                 TableName = "ContractDetail",
                 DisplayName = "销售合同明细表",
-                Description = "合同明细表，记录合同的产品明细信息"
+                Description = "合同明细表，记录合同的产品明细信息",
+                Granularity = "每个合同明细行",
+                GranularityLevel = TableStructureGranularityLevel.Fact,
             };
             var fields = new List<TableField>
 {
@@ -744,7 +759,9 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                 ConnectionId = ConnectionId,
                 TableName = "ContractChange",
                 DisplayName = "销售合同变更表",
-                Description = "合同变更表，记录合同的变更申请和审批信息"
+                Description = "合同变更表，记录合同的变更申请和审批信息",
+                Granularity = "每个合同变更申请",
+                GranularityLevel = TableStructureGranularityLevel.Fact,
             };
 
             var fields = new List<TableField>
@@ -803,7 +820,9 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
                 ConnectionId = ConnectionId,
                 TableName = "ContractHandover",
                 DisplayName = "合同交底表",
-                Description = "合同交底表，记录合同签署后的交底信息"
+                Description = "合同交底表，记录合同签署后的交底信息",
+                Granularity = "每个合同交底记录",
+                GranularityLevel = TableStructureGranularityLevel.Dimension,
             };
 
             var fields = new List<TableField>
@@ -1100,21 +1119,40 @@ namespace SqlBoTx.Net.DbManager.SeedDatas
             if (tableNameToIdMap.ContainsKey("Organization"))
             {
                 var table = tableStructures.Find(x => x.TableName == "Organization")!;
+                var dimension1 = new string[] { "OrganizationCode", "OrganizationName" };
+                var dimension2 = new string[] { "CreateTime" };
                 list.Add(new BusinessObjective
                 {
                     BusinessName = "组织架构",
                     DependencyTables = new List<BusinessObjectiveDependencyTable> {
-                         new ()
-                         {
-                           TableId = table.TableId
-                         }
+                        new () { TableId = table.TableId }
                     },
-                    Fields = table.TableFields.Select(x => new BusinessObjectiveField
+                    Fields = table.TableFields.Select(x =>
                     {
-                        FieldId = x.FieldId,
-                        Name = x.FieldName,
-                        Description = x.FieldDescription,
+                        var result = new BusinessObjectiveField
+                        {
+                            FieldId = x.FieldId,
+                            Name = x.FieldName,
+                            Description = x.FieldDescription,
+                            BusinesBIRole = (x.IsPrimaryKey || dimension1.Contains(x.ColumnName)) ? BusinessObjectiveFieldBusinesBIRole.Demension : BusinessObjectiveFieldBusinesBIRole.Attribute,
+                        };
 
+                        if (x.IsPrimaryKey)
+                        {
+                            result.DimensionLayer = BusinessObjectiveFieldDimensionLayer.实体;
+                        }
+
+                        if (dimension1.Contains(x.ColumnName))
+                        {
+                            result.DimensionLayer = BusinessObjectiveFieldDimensionLayer.组织;
+                        }
+
+                        if (dimension2.Contains(x.ColumnName))
+                        {
+                            result.DimensionLayer = BusinessObjectiveFieldDimensionLayer.年 | BusinessObjectiveFieldDimensionLayer.月 | BusinessObjectiveFieldDimensionLayer.日;
+                        }
+
+                        return result;
                     }).ToList()
                 });
             }
