@@ -26,9 +26,6 @@ namespace SqlBoTx.Net.EFCore
                 //o.UseLoggerFactory(loggerFactory).EnableSensitiveDataLogging();
             }, 60);
 
-
-         
-
             services.AddEFCoreRepository();
 
             return services;
@@ -36,7 +33,6 @@ namespace SqlBoTx.Net.EFCore
 
         private static IServiceCollection AddEFCoreRepository(this IServiceCollection services)
         {
-
             services.AddScoped<IUnitOfWork, UnitOfWork>();
             services.AddScoped<IDatabaseConnectionRepository, DatabaseConnectionRepository>();
             services.AddScoped<ITableStructureRepository, TableStructureRepository>();

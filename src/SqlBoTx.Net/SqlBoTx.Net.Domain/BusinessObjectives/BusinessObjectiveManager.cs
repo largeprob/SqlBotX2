@@ -22,14 +22,10 @@ namespace SqlBoTx.Net.Domain.BusinessObjectives
             // 业务规则验证
             if (string.IsNullOrWhiteSpace(input.BusinessName))
             {
-                throw new BusinessException("BusinessObjective001", "业务名称不能为空");
+                throw new BusinessException("BusinessObjective001", "业务域名称不能为空");
             }
 
-            // 业务规则验证
-            if (input.DependencyTables == null || input.DependencyTables.Count <= 0)
-            {
-                throw new BusinessException("BusinessObjective001", "依赖表不能为空");
-            }
+         
 
 
             input.CreatedDate = DateTime.Now;

@@ -45,19 +45,19 @@ namespace SqlBoTx.Net.Application.BusinessObjectives
         /// <returns></returns>
         public async Task<List<ListBusinessObjectiveDto>> ListAsync()
         {
-            var list = await _businessObjectiveRepository.ListAsync();
-            var result = list.Adapt<List<ListBusinessObjectiveDto>>();
+            //var list = await _businessObjectiveRepository.ListAsync();
+            //var result = list.Adapt<List<ListBusinessObjectiveDto>>();
 
-            var tableIds = list.SelectMany(x => x.DependencyTables!).Select(x => x.TableId).Distinct().ToList();
-            var tableList = await _tableStructureRepository.ListAsync((p) => p.Where(x => tableIds.Contains(x.TableId)));
+            //var tableIds = list.SelectMany(x => x.DependencyTables!).Select(x => x.TableId).Distinct().ToList();
+            //var tableList = await _tableStructureRepository.ListAsync((p) => p.Where(x => tableIds.Contains(x.TableId)));
          
-            foreach (var item in result)
-            {
-                var thisTableIds = item.DependencyTables!.Select(x => x.TableId).Distinct();
-                var thisTableList = tableList.Where(x => thisTableIds.Contains(x.TableId));
-                item.DependencyTables = thisTableList.Adapt<List<ListTableStructureDto>>();
-            }
-            return result;
+            //foreach (var item in result)
+            //{
+            //    var thisTableIds = item.DependencyTables!.Select(x => x.TableId).Distinct();
+            //    var thisTableList = tableList.Where(x => thisTableIds.Contains(x.TableId));
+            //    item.DependencyTables = thisTableList.Adapt<List<ListTableStructureDto>>();
+            //}
+            return default;
         }
 
         /// <summary>
@@ -66,26 +66,28 @@ namespace SqlBoTx.Net.Application.BusinessObjectives
         /// <returns></returns>
         public async Task<List<ListBusinessObjectiveDto>> ListByIdAsync(int[] ids)
         {
-            var list = await _businessObjectiveRepository.ListAsync(q => q.Where(x => ids.Contains(x.Id)).Include(x => x.DependencyTables));
+            //var list = await _businessObjectiveRepository.ListAsync(q => q.Where(x => ids.Contains(x.Id)));
 
-            //表
-            var allTableIds = list.SelectMany(x => x.DependencyTables!).Select(x => x.TableId).Distinct().ToList();
-            var tableList = (await _tableStructureRepository.ListAsync((p) => p.Where(x => allTableIds.Contains(x.TableId))))
-            .Adapt<List<ListTableStructureDto>>().ToDictionary(x => x.TableId);
+            ////表
+            //var allTableIds = list.SelectMany(x => x.DependencyTables!).Select(x => x.TableId).Distinct().ToList();
+            //var tableList = (await _tableStructureRepository.ListAsync((p) => p.Where(x => allTableIds.Contains(x.TableId))))
+            //.Adapt<List<ListTableStructureDto>>().ToDictionary(x => x.TableId);
 
-           
-            return list.Select(x =>
-            {
-                //var dto = new ListBusinessObjectiveDto { Id = x.Id };
-                var dto = x.Adapt<ListBusinessObjectiveDto>();
-                if (x.DependencyTables != null && x.DependencyTables.Count > 0) 
-                {
-                    dto.DependencyTables = dto.DependencyTables
-                    .Where(t => tableList.ContainsKey(t.TableId))
-                    .Select(t => tableList[t.TableId]).ToList();
-                }
-                return dto;
-            }).ToList();
+
+            //return list.Select(x =>
+            //{
+            //    //var dto = new ListBusinessObjectiveDto { Id = x.Id };
+            //    var dto = x.Adapt<ListBusinessObjectiveDto>();
+            //    if (x.DependencyTables != null && x.DependencyTables.Count > 0) 
+            //    {
+            //        dto.DependencyTables = dto.DependencyTables
+            //        .Where(t => tableList.ContainsKey(t.TableId))
+            //        .Select(t => tableList[t.TableId]).ToList();
+            //    }
+            //    return dto;
+            //}).ToList();
+
+            return default;
         }
 
         /// <summary>

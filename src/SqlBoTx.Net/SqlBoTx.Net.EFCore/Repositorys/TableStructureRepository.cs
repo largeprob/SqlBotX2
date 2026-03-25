@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using SqlBoTx.Net.Domain.TableFields;
 using SqlBoTx.Net.Domain.TableRelationships;
 using SqlBoTx.Net.Domain.TableStructures;
 using SqlBoTx.Net.EFCore;
@@ -65,7 +64,7 @@ namespace SqlBoTx.Net.EFCore.Repositorys
         public async Task UpdateAsync(TableStructure entity)
         {
             // First, delete existing fields for this table
-            await _dbContext.Set<TableField>()
+            await _dbContext.Set<TableStructureColumn>()
                 .Where(x => x.TableId == entity.TableId)
                 .ExecuteDeleteAsync();
 
@@ -75,17 +74,17 @@ namespace SqlBoTx.Net.EFCore.Repositorys
                 .ExecuteUpdateAsync(s => s
                     .SetProperty(x => x.ConnectionId, entity.ConnectionId)
                     .SetProperty(x => x.TableName, entity.TableName)
-                    .SetProperty(x => x.DisplayName, entity.DisplayName)
+                    .SetProperty(x => x.Alias, entity.Alias)
                     .SetProperty(x => x.FieldCount, entity.FieldCount)
                     .SetProperty(x => x.Description, entity.Description)
                 );
 
             // Add new fields
-            foreach (var field in entity.TableFields)
+            foreach (var field in entity.Columns)
             {
                 field.TableId = entity.TableId;
             }
-            await _dbContext.Set<TableField>().AddRangeAsync(entity.TableFields);
+            await _dbContext.Set<TableStructureColumn>().AddRangeAsync(entity.Columns);
         }
 
         /// <summary>
@@ -98,7 +97,7 @@ namespace SqlBoTx.Net.EFCore.Repositorys
             // Cascade delete will handle fields via EF Core configuration
             await _dbContext.Set<TableStructure>()
                .Where(x => x.TableId == tableId)
-               .Include(x => x.TableFields)
+               .Include(x => x.Columns)
                .ExecuteDeleteAsync();
         }
     }

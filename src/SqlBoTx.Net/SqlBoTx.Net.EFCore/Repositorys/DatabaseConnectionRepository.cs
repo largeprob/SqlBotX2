@@ -35,7 +35,7 @@ namespace SqlBoTx.Net.EFCore.Repositorys
         /// <returns></returns>
         public async Task<bool> ExistAsync(int id)
         {
-            var entity = await _dbContext.Set<DatabaseConnection>().FirstOrDefaultAsync(x => x.ConnectionId == id);
+            var entity = await _dbContext.Set<DatabaseConnection>().FirstOrDefaultAsync(x => x.Id == id);
             return entity != null;
         }
 
@@ -74,7 +74,7 @@ namespace SqlBoTx.Net.EFCore.Repositorys
         {
             return
             await _dbContext.Set<DatabaseConnection>()
-             .Where(x => x.ConnectionId == entity.ConnectionId)
+             .Where(x => x.Id == entity.Id)
              .ExecuteUpdateAsync(s => s
                  .SetProperty(x => x.ConnectionName, entity.ConnectionName)
                  .SetProperty(x => x.ConnectionType, entity.ConnectionType)
@@ -95,9 +95,9 @@ namespace SqlBoTx.Net.EFCore.Repositorys
         {
             return
             await _dbContext.Set<DatabaseConnection>()
-             .Where(x => x.ConnectionId == connectionId)
+             .Where(x => x.Id == connectionId)
              .Include(x => x.TableStructures)
-             .ThenInclude(x=>x.TableFields)
+             .ThenInclude(x=>x.Columns)
              .ExecuteDeleteAsync();
         }
     }

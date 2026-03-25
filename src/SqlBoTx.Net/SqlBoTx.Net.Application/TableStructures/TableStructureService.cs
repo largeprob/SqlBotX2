@@ -1,9 +1,9 @@
 using Mapster;
 using Microsoft.EntityFrameworkCore;
+using Spectre.Console;
 using SqlBoTx.Net.Application.Contracts.TableStructures;
 using SqlBoTx.Net.Application.Contracts.TableStructures.Dtos;
 using SqlBoTx.Net.Domain;
-using SqlBoTx.Net.Domain.TableFields;
 using SqlBoTx.Net.Domain.TableRelationships;
 using SqlBoTx.Net.Domain.TableStructures;
 
@@ -32,7 +32,7 @@ namespace SqlBoTx.Net.Application.TableStructures
         /// <returns></returns>
         public async Task<List<ListTableStructureDto>> ListAsync()
         {
-            var list = await _tableStructureRepository.ListAsync(q => q.Include(x => x.TableFields));
+            var list = await _tableStructureRepository.ListAsync(q => q.Include(x => x.Columns));
             return list.Adapt<List<ListTableStructureDto>>();
         }
 
@@ -45,7 +45,7 @@ namespace SqlBoTx.Net.Application.TableStructures
         {
             var list = await _tableStructureRepository.ListAsync(q => q
                 .Where(x => x.ConnectionId == connectionId)
-                .Include(x => x.TableFields));
+                .Include(x => x.Columns));
             return list.Adapt<List<ListTableStructureDto>>();
         }
 
@@ -55,7 +55,7 @@ namespace SqlBoTx.Net.Application.TableStructures
         /// <returns></returns>
         public async Task<List<ListTableStructureDto>> ListByIdAsync(int[] ids)
         {
-            var list = await _tableStructureRepository.ListAsync(q => q.Where(x => ids.Contains(x.TableId)).Include(x => x.TableFields));
+            var list = await _tableStructureRepository.ListAsync(q => q.Where(x => ids.Contains(x.TableId)).Include(x => x.Columns));
             return list.Adapt<List<ListTableStructureDto>>();
         }
 
@@ -68,7 +68,7 @@ namespace SqlBoTx.Net.Application.TableStructures
         {
             await using (var uow = await _unitOfWork.BeginTransactionAsync())
             {
-                var tableFields = input.TableFields.Adapt<List<TableField>>();
+                var tableFields = input.TableFields.Adapt<List<TableStructureColumn>>();
 
                 var entity = await _tableStructureManager.CreateAsync(input.Adapt<TableStructure>(), tableFields);
                 await _tableStructureRepository.InsterAsync(entity);
@@ -87,7 +87,7 @@ namespace SqlBoTx.Net.Application.TableStructures
             await using (var uow = await _unitOfWork.BeginTransactionAsync())
             {
                 // Convert DTO fields to entities
-                var tableFields = input.TableFields.Adapt<List<TableField>>();
+                var tableFields = input.TableFields.Adapt<List<TableStructureColumn>>();
 
                 var entity = await _tableStructureManager.UpdateAsync(input.Adapt<TableStructure>(), tableFields);
                 await _tableStructureRepository.UpdateAsync(entity);

@@ -24,16 +24,10 @@ namespace SqlBoTx.Net.Application.Contracts.BusinessObjectives.Embeddings
         public int MetaDataId { get; set; }
 
         /// <summary>
-        /// 类型：field:普通字段、calculated:指标
+        /// 1维度2/时间/3度量/4属性
         /// </summary>
-        public string? MetaDataType { get; set; }
-
-        /// <summary>
-        /// 业务角色类型
-        /// </summary>
-        [VectorStoreData]
-        public int? MetaDataBusinesBIRole { get; set; }
-
+        public int? SemanticType { get; set; }
+ 
         /// <summary>
         /// 字段名称
         /// </summary>
@@ -49,6 +43,12 @@ namespace SqlBoTx.Net.Application.Contracts.BusinessObjectives.Embeddings
         #endregion
 
         /// <summary>
+        /// 归属实体ID
+        /// </summary>
+        [VectorStoreData(IsIndexed = true)]
+        public string EntityId { get; set; }
+
+        /// <summary>
         /// 归属目标元数据
         /// </summary>
         [VectorStoreData(IsIndexed = true)]
@@ -59,12 +59,6 @@ namespace SqlBoTx.Net.Application.Contracts.BusinessObjectives.Embeddings
         /// </summary>
         [VectorStoreData]
         public string? ObjectiveMetaDataName { get; set; }
-
-        /// <summary>
-        /// 归属目标元数据
-        /// </summary>
-        [VectorStoreData]
-        public string? ObjectiveMetaDataDescription { get; set; }
 
         /// <summary>
         /// 字段名向量数据

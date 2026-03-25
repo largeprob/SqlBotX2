@@ -19,7 +19,7 @@ namespace SqlBoTx.Net.Application.Vectors
     {
         private IEmbeddingGenerator<string, Embedding<float>> _embeddingGenerator;
 
-        private const string CLIENT_IP = "110.41.187.122";
+        private const string CLIENT_IP = "192.168.0.100";
         public QdrantVectorStore? VectorStore { get; private set; }
         public QdrantClient? VectorClient { get; private set; }
         public QdrantVectorService(IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator)

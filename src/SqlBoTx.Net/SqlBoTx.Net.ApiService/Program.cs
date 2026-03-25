@@ -1,6 +1,8 @@
  
 using SqlBoTx.Net.ApiService;
 using SqlBoTx.Net.ApiService.SqlBotX;
+using SqlBoTx.Net.ApiService.SqlBotX.Agents;
+using SqlBoTx.Net.ApiService.SqlBotX.Tools;
 using SqlBoTx.Net.ApiService.SqlPlugin;
 using SqlBoTx.Net.Application;
 using SqlBoTx.Net.Application.BusinessObjectives;
@@ -69,6 +71,14 @@ builder.Services.AddApplicationService();
 builder.Services.AddScoped<SqlServerDatabaseService>();
 builder.AddKernelCompletion();
 builder.Services.AddTransient<SQLChatXService>();
+
+
+builder.Services.AddTransient<QueryVectorFieldsOfDomain>();
+builder.Services.AddTransient<QueryVectorFieldsGlobal>();
+builder.Services.AddTransient<GetstandardCalculationFormulay>();
+builder.Services.AddTransient<GetBusinessTerminology>();
+builder.Services.AddTransient<AmbiguityAgent>();
+builder.Services.AddTransient<AskUser>();
 
 builder.Services.AddTransient<SqlBotPlugin>();
 

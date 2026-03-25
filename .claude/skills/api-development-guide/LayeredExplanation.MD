@@ -302,7 +302,7 @@ Application.Contracts
 类型 | 命名模式 | 示例 
 ---------|------|------
 **DTO** |`[动作][实体名]Dto` | `AddDatabaseConnectionDto`, `UpdateDatabaseConnectionDto` 
-**应用服务接口** | `I[功能名]Service` | `IDatabaseConnectionService` |
+**应用服务接口** | `I[功能名]Service` | `IDatabaseConnectionService` 
 
 
 # Application

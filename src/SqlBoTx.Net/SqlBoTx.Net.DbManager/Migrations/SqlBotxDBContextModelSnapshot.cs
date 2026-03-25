@@ -23,64 +23,229 @@ namespace SqlBoTx.Net.DbManager.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessMetrics.BusinessMetricJoinPath", b =>
+            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessEntities.DomainEntity", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Alias")
+                        .IsRequired()
+                        .IsUnicode(true)
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("alias");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("description");
+
+                    b.Property<int>("DomainId")
+                        .HasColumnType("int")
+                        .HasColumnName("domain_id");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("name");
+
+                    b.Property<int>("ReferenceConnectId")
+                        .HasColumnType("int")
+                        .HasColumnName("reference_connect_id");
+
+                    b.Property<int>("ReferenceTableId")
+                        .HasColumnType("int")
+                        .HasColumnName("reference_table_id");
+
+                    b.Property<string>("Tags")
+                        .HasColumnType("NVARCHAR(500)")
+                        .HasColumnName("tags");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DomainId");
+
+                    b.HasIndex("ReferenceConnectId");
+
+                    b.HasIndex("ReferenceTableId");
+
+                    b.ToTable("domain_entity", null, t =>
+                        {
+                            t.HasComment("DomainEntity");
+                        });
+                });
+
+            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessEntities.DomainEntityAttr", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
                         .HasColumnName("id")
-                        .HasComment("主键");
+                        .HasComment("主键自增ID");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Alias")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR(500)")
-                        .HasColumnName("alias")
-                        .HasComment("目标表别名");
-
-                    b.Property<int>("BusinessMetricId")
+                    b.Property<int>("ColumnId")
                         .HasColumnType("int")
-                        .HasColumnName("business_metric_id")
-                        .HasComment("业务指标Id");
+                        .HasColumnName("column_id")
+                        .HasComment("引用库字段ID");
 
-                    b.Property<string>("JoinType")
+                    b.Property<string>("ColumnName")
                         .IsRequired()
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("NVARCHAR(255)")
-                        .HasDefaultValue("LEFT JOIN")
-                        .HasColumnName("join_type")
-                        .HasComment("连接类型");
+                        .HasColumnName("column_name")
+                        .HasComment("属性列名");
 
-                    b.Property<string>("OnCondition")
+                    b.Property<int>("DataType")
+                        .HasColumnType("int")
+                        .HasColumnName("data_type")
+                        .HasComment("数据类型");
+
+                    b.Property<string>("DataTypeSchema")
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("data_type_schema")
+                        .HasComment("数据类型概要（用来描述取值）");
+
+                    b.Property<string>("DefaultValue")
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("default_value")
+                        .HasComment("默认值");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("description")
+                        .HasComment("字段说明（字段额外的解释）");
+
+                    b.Property<int?>("DimensionCategory")
+                        .HasColumnType("int")
+                        .HasColumnName("dimension_category")
+                        .HasComment("维度分类（SemanticType = Dimension 时有效）");
+
+                    b.Property<string>("EntityId")
                         .IsRequired()
-                        .HasColumnType("NVARCHAR(500)")
-                        .HasColumnName("on_condition")
-                        .HasComment("连接条件");
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("entity_id")
+                        .HasComment("实体ID");
 
-                    b.Property<int>("Order")
-                        .HasColumnType("int")
-                        .HasColumnName("order")
-                        .HasComment("排序");
+                    b.Property<bool>("IsRequired")
+                        .HasColumnType("bit")
+                        .HasColumnName("is_required")
+                        .HasComment("是否必要");
 
-                    b.Property<int>("TableId")
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("label")
+                        .HasComment("属性名称");
+
+                    b.Property<int>("SemanticType")
                         .HasColumnType("int")
-                        .HasColumnName("table_id")
-                        .HasComment("目标表Id）");
+                        .HasColumnName("semantic_type")
+                        .HasComment("语义类型");
+
+                    b.Property<int>("StructureRole")
+                        .HasColumnType("int")
+                        .HasColumnName("structure_role")
+                        .HasComment("结构语义");
+
+                    b.Property<int?>("SupportedAggregations")
+                        .HasColumnType("int")
+                        .HasColumnName("supported_aggregations")
+                        .HasComment("仅当 SemanticType = Measure 时有效。可使用的度量函数");
+
+                    b.Property<int?>("TimeGranularity")
+                        .HasColumnType("int")
+                        .HasColumnName("time_granularity")
+                        .HasComment("时间粒度（SemanticType = DateTime 时有效）");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BusinessMetricId");
+                    b.HasIndex("ColumnId");
 
-                    b.HasIndex("TableId");
+                    b.HasIndex("EntityId");
 
-                    b.ToTable("business_metric_join_path", null, t =>
+                    b.ToTable("domain_entity_attr", null, t =>
                         {
-                            t.HasComment("业务指标路径");
+                            t.HasComment("实体属性");
                         });
                 });
 
-            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessMetrics.BusinessObjectiveMetric", b =>
+            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessEntities.DomainEntityRel", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("id")
+                        .HasComment("主键自增ID");
+
+                    b.Property<int>("CascadeDelete")
+                        .HasColumnType("int")
+                        .HasColumnName("cascade_delete")
+                        .HasComment("是否级联删除");
+
+                    b.Property<string>("InverseOf")
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("inverse_of")
+                        .HasComment("反向关系Id");
+
+                    b.Property<string>("JoinConditions")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(500)")
+                        .HasColumnName("join_conditions")
+                        .HasComment("关联条件");
+
+                    b.Property<string>("SourceCardinality")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("source_cardinality")
+                        .HasComment("源端基数（One/Many）");
+
+                    b.Property<string>("SourceEntityId")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("source_entity_id")
+                        .HasComment("源实体标识符");
+
+                    b.Property<string>("SourceRole")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("source_role")
+                        .HasComment("源角色名称");
+
+                    b.Property<string>("TargetCardinality")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("target_cardinality")
+                        .HasComment("目标端基数（One/Many）");
+
+                    b.Property<string>("TargetEntityId")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("target_entity_id")
+                        .HasComment("目标实体标识符");
+
+                    b.Property<string>("TargetRole")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("target_role")
+                        .HasComment("目标角色名称");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int")
+                        .HasColumnName("type")
+                        .HasComment("关联类型");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SourceEntityId");
+
+                    b.HasIndex("TargetEntityId");
+
+                    b.ToTable("domain_entity_rel", null, t =>
+                        {
+                            t.HasComment("实体关系");
+                        });
+                });
+
+            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessMetrics.DomainMetric", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -95,11 +260,6 @@ namespace SqlBoTx.Net.DbManager.Migrations
                         .HasColumnName("alias")
                         .HasComment("近义词/检索关键词");
 
-                    b.Property<int>("BusinessObjectiveId")
-                        .HasColumnType("int")
-                        .HasColumnName("business_objective_id")
-                        .HasComment("外键-归属业务模块Id");
-
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
                         .HasColumnName("created_date")
@@ -110,23 +270,16 @@ namespace SqlBoTx.Net.DbManager.Migrations
                         .HasColumnName("description")
                         .HasComment("指标解释");
 
+                    b.Property<int?>("DomainId")
+                        .HasColumnType("int")
+                        .HasColumnName("domain_id")
+                        .HasComment("外键-归属业务模块Id");
+
                     b.Property<string>("Expression")
                         .IsRequired()
                         .HasColumnType("NVARCHAR(500)")
                         .HasColumnName("expression")
                         .HasComment("计算公式（非原子）");
-
-                    b.Property<string>("MainAlias")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("NVARCHAR(255)")
-                        .HasDefaultValue("Main")
-                        .HasColumnName("main_alias");
-
-                    b.Property<int>("MainTableId")
-                        .HasColumnType("int")
-                        .HasColumnName("main_table_id")
-                        .HasComment("依赖主体-主表");
 
                     b.Property<string>("MetricCode")
                         .IsRequired()
@@ -140,6 +293,11 @@ namespace SqlBoTx.Net.DbManager.Migrations
                         .HasColumnName("metric_name")
                         .HasComment("指标名称");
 
+                    b.Property<int>("Scope")
+                        .HasColumnType("int")
+                        .HasColumnName("scope")
+                        .HasComment("作用域");
+
                     b.Property<int>("Status")
                         .HasColumnType("int")
                         .HasColumnName("status")
@@ -152,13 +310,59 @@ namespace SqlBoTx.Net.DbManager.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BusinessObjectiveId");
+                    b.HasIndex("DomainId");
 
-                    b.HasIndex("MainTableId");
-
-                    b.ToTable("business_objective_metric", null, t =>
+                    b.ToTable("domain_metric", null, t =>
                         {
                             t.HasComment("业务指标");
+                        });
+                });
+
+            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessMetrics.MetricFieldPlaceholder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("id")
+                        .HasComment("主键");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AttrId")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(500)")
+                        .HasColumnName("attr_id")
+                        .HasComment("属性Id");
+
+                    b.Property<string>("AttrName")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(500)")
+                        .HasColumnName("attr_name")
+                        .HasComment("属性名");
+
+                    b.Property<string>("EntityId")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("entity_id")
+                        .HasComment("归属实体Id");
+
+                    b.Property<int>("Index")
+                        .HasColumnType("int")
+                        .HasColumnName("index")
+                        .HasComment("占位符序号");
+
+                    b.Property<int>("MetricId")
+                        .HasColumnType("int")
+                        .HasColumnName("metric_id")
+                        .HasComment("指标外键");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MetricId");
+
+                    b.ToTable("metric_field_placeholder", null, t =>
+                        {
+                            t.HasComment("指标字段占位符");
                         });
                 });
 
@@ -176,7 +380,7 @@ namespace SqlBoTx.Net.DbManager.Migrations
                         .IsRequired()
                         .HasColumnType("NVARCHAR(255)")
                         .HasColumnName("business_name")
-                        .HasComment("业务名称");
+                        .HasComment("业务域名称");
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2")
@@ -188,10 +392,30 @@ namespace SqlBoTx.Net.DbManager.Migrations
                         .HasColumnName("description")
                         .HasComment("业务解释");
 
+                    b.Property<string>("KeyWords")
+                        .HasColumnType("NVARCHAR(500)")
+                        .HasColumnName("key_words")
+                        .HasComment("关键词：快速定位该领域，而非近义词");
+
+                    b.Property<int?>("ParentId")
+                        .HasColumnType("int")
+                        .HasColumnName("parent_id")
+                        .HasComment("父业务域ID");
+
+                    b.Property<string>("Summary")
+                        .HasColumnType("NVARCHAR(500)")
+                        .HasColumnName("summary")
+                        .HasComment("业务域总结");
+
                     b.Property<string>("Synonyms")
                         .HasColumnType("NVARCHAR(500)")
                         .HasColumnName("synonyms")
                         .HasComment("近义词");
+
+                    b.Property<string>("Tags")
+                        .HasColumnType("NVARCHAR(500)")
+                        .HasColumnName("tags")
+                        .HasComment("领域标签：核心域、支撑域、通用域、系统域");
 
                     b.Property<DateTime?>("UpdatedDate")
                         .HasColumnType("datetime2")
@@ -200,79 +424,23 @@ namespace SqlBoTx.Net.DbManager.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("ParentId");
+
                     b.ToTable("business_objective", null, t =>
                         {
-                            t.HasComment("业务目标");
-                        });
-                });
-
-            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessObjectives.BusinessObjectiveField", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("id")
-                        .HasComment("主键");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int?>("BusinesBIRole")
-                        .HasColumnType("int")
-                        .HasColumnName("busines_birole")
-                        .HasComment("业务分析角色");
-
-                    b.Property<int>("BusinessObjectiveId")
-                        .HasColumnType("int")
-                        .HasColumnName("business_objective_id")
-                        .HasComment("外键-归属业务模块Id");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("NVARCHAR(255)")
-                        .HasColumnName("description")
-                        .HasComment("字段说明");
-
-                    b.Property<int?>("DimensionLayer")
-                        .HasColumnType("int")
-                        .HasColumnName("dimension_layer")
-                        .HasComment("维度层次");
-
-                    b.Property<int>("FieldId")
-                        .HasColumnType("int")
-                        .HasColumnName("field_id")
-                        .HasComment("表字段ID");
-
-                    b.Property<int?>("MetricLayer")
-                        .HasColumnType("int")
-                        .HasColumnName("metric_layer")
-                        .HasComment("度量层次");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR(255)")
-                        .HasColumnName("name")
-                        .HasComment("字段名称");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("BusinessObjectiveId");
-
-                    b.HasIndex("FieldId");
-
-                    b.ToTable("business_objective_field", null, t =>
-                        {
-                            t.HasComment("业务目标字段");
+                            t.HasComment("业务域");
                         });
                 });
 
             modelBuilder.Entity("SqlBoTx.Net.Domain.DatabaseConnections.DatabaseConnection", b =>
                 {
-                    b.Property<int>("ConnectionId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("connection_id")
+                        .HasColumnName("id")
                         .HasComment("主键自增ID");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ConnectionId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<string>("ConnectionName")
                         .IsRequired()
@@ -316,7 +484,7 @@ namespace SqlBoTx.Net.DbManager.Migrations
                         .HasColumnName("user_password")
                         .HasComment("密码");
 
-                    b.HasKey("ConnectionId");
+                    b.HasKey("Id");
 
                     b.ToTable("database_connection", null, t =>
                         {
@@ -324,82 +492,44 @@ namespace SqlBoTx.Net.DbManager.Migrations
                         });
                 });
 
-            modelBuilder.Entity("SqlBoTx.Net.Domain.TableFields.TableField", b =>
+            modelBuilder.Entity("SqlBoTx.Net.Domain.DomainTerms.DomainTerm", b =>
                 {
-                    b.Property<int>("FieldId")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int")
-                        .HasColumnName("field_id")
+                        .HasColumnName("id")
                         .HasComment("主键自增ID");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FieldId"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("ColumnName")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR(255)")
-                        .HasColumnName("column_name")
-                        .HasComment("字段名称");
+                    b.Property<string>("Alias")
+                        .HasColumnType("NVARCHAR(500)")
+                        .HasColumnName("alias")
+                        .HasComment("别名近义词");
 
-                    b.Property<string>("DataType")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR(255)")
-                        .HasColumnName("data_type")
-                        .HasComment("字段数据类型");
+                    b.Property<string>("Description")
+                        .HasColumnType("NVARCHAR(500)")
+                        .HasColumnName("description")
+                        .HasComment("解释说明");
 
-                    b.Property<string>("DefaultValue")
-                        .HasColumnType("NVARCHAR(255)")
-                        .HasColumnName("default_value")
-                        .HasComment("默认值");
-
-                    b.Property<string>("FieldDescription")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR(255)")
-                        .HasColumnName("field_description")
-                        .HasComment("字段说明");
-
-                    b.Property<string>("FieldName")
-                        .HasColumnType("NVARCHAR(255)")
-                        .HasColumnName("field_name")
-                        .HasComment("字段中文名称");
-
-                    b.Property<bool?>("IsAvailable")
-                        .HasColumnType("bit")
-                        .HasColumnName("is_available")
-                        .HasComment("是否可用");
-
-                    b.Property<bool>("IsIdentity")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_identity")
-                        .HasComment("是否为自增字段");
-
-                    b.Property<bool>("IsNullable")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true)
-                        .HasColumnName("is_nullable")
-                        .HasComment("是否允许为空");
-
-                    b.Property<bool>("IsPrimaryKey")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(false)
-                        .HasColumnName("is_primary_key")
-                        .HasComment("是否为主键");
-
-                    b.Property<int>("TableId")
+                    b.Property<int>("DomainId")
                         .HasColumnType("int")
-                        .HasColumnName("table_id")
-                        .HasComment("外键");
+                        .HasColumnName("domain_id")
+                        .HasComment("所属业务域ID");
 
-                    b.HasKey("FieldId");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("name")
+                        .HasComment("术语名");
 
-                    b.HasIndex("TableId");
+                    b.HasKey("Id");
 
-                    b.ToTable("table_field", null, t =>
+                    b.HasIndex("DomainId");
+
+                    b.ToTable("domain_term", null, t =>
                         {
-                            t.HasComment("表字段明细信息");
+                            t.HasComment("领域术语");
                         });
                 });
 
@@ -429,15 +559,20 @@ namespace SqlBoTx.Net.DbManager.Migrations
                         .HasColumnName("relationship_description")
                         .HasComment("关系类型");
 
-                    b.Property<int>("RelationshipType")
+                    b.Property<int>("SourceCardinality")
                         .HasColumnType("int")
-                        .HasColumnName("relationship_type")
-                        .HasComment("关系类型");
+                        .HasColumnName("source_cardinality")
+                        .HasComment("源端基数（One/Many）");
 
                     b.Property<int>("SourceTableId")
                         .HasColumnType("int")
                         .HasColumnName("source_table_id")
                         .HasComment("源表ID");
+
+                    b.Property<int>("TargetCardinality")
+                        .HasColumnType("int")
+                        .HasColumnName("target_cardinality")
+                        .HasComment("目标端基数（One/Many）");
 
                     b.Property<int>("TargetTableId")
                         .HasColumnType("int")
@@ -471,10 +606,15 @@ namespace SqlBoTx.Net.DbManager.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("TableId"));
 
+                    b.Property<string>("Alias")
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("alias")
+                        .HasComment("别名");
+
                     b.Property<int>("ConnectionId")
                         .HasColumnType("int")
                         .HasColumnName("connection_id")
-                        .HasComment("外键");
+                        .HasComment("数据库连接ID");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -482,26 +622,15 @@ namespace SqlBoTx.Net.DbManager.Migrations
                         .HasColumnName("description")
                         .HasComment("表描述");
 
-                    b.Property<string>("DisplayName")
-                        .IsRequired()
-                        .HasColumnType("NVARCHAR(255)")
-                        .HasColumnName("display_name")
-                        .HasComment("显示名称");
-
                     b.Property<int>("FieldCount")
                         .HasColumnType("int")
                         .HasColumnName("field_count")
                         .HasComment("字段数量");
 
-                    b.Property<string>("Granularity")
+                    b.Property<string>("SchemaName")
                         .HasColumnType("NVARCHAR(255)")
-                        .HasColumnName("granularity")
-                        .HasComment("颗粒度描述");
-
-                    b.Property<int?>("GranularityLevel")
-                        .HasColumnType("int")
-                        .HasColumnName("granularity_level")
-                        .HasComment("颗粒度级别");
+                        .HasColumnName("schema_name")
+                        .HasComment("模式");
 
                     b.Property<string>("TableName")
                         .IsRequired()
@@ -516,6 +645,136 @@ namespace SqlBoTx.Net.DbManager.Migrations
                     b.ToTable("table_structure", null, t =>
                         {
                             t.HasComment("数据库表结构");
+                        });
+                });
+
+            modelBuilder.Entity("SqlBoTx.Net.Domain.TableStructures.TableStructureColumn", b =>
+                {
+                    b.Property<int>("FieldId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasColumnName("field_id")
+                        .HasComment("主键自增ID");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FieldId"));
+
+                    b.Property<string>("ColumnName")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("column_name")
+                        .HasComment("字段名称");
+
+                    b.Property<string>("DataType")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("data_type")
+                        .HasComment("字段数据类型");
+
+                    b.Property<string>("DataTypeSchema")
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("data_type_schema")
+                        .HasComment("类型描述");
+
+                    b.Property<string>("DefaultValue")
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("default_value")
+                        .HasComment("默认值");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("description")
+                        .HasComment("字段说明");
+
+                    b.Property<string>("Expression")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasDefaultValue("False")
+                        .HasColumnName("expression")
+                        .HasComment("表达式");
+
+                    b.Property<string>("Indexs")
+                        .HasColumnType("NVARCHAR(500)")
+                        .HasColumnName("indexs")
+                        .HasComment("索引");
+
+                    b.Property<bool>("IsComputed")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_computed")
+                        .HasComment("是否计算列");
+
+                    b.Property<bool>("IsIdentity")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_identity")
+                        .HasComment("是否为自增字段");
+
+                    b.Property<bool>("IsIndex")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_index")
+                        .HasComment("是否索引");
+
+                    b.Property<bool>("IsPrimaryKey")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_primary_key")
+                        .HasComment("是否为主键");
+
+                    b.Property<bool>("IsReference")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_reference")
+                        .HasComment("外键引用");
+
+                    b.Property<bool>("IsRequired")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_required")
+                        .HasComment("是否必填");
+
+                    b.Property<bool>("IsUnique")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bit")
+                        .HasDefaultValue(false)
+                        .HasColumnName("is_unique")
+                        .HasComment("是否唯一");
+
+                    b.Property<string>("Label")
+                        .IsRequired()
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("label")
+                        .HasComment("标题");
+
+                    b.Property<string>("ReferenceColumn")
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("reference_column")
+                        .HasComment("引用字段");
+
+                    b.Property<string>("ReferenceTableName")
+                        .HasColumnType("NVARCHAR(255)")
+                        .HasColumnName("reference_table_name")
+                        .HasComment("引用表名");
+
+                    b.Property<int>("TableId")
+                        .HasColumnType("int")
+                        .HasColumnName("table_id")
+                        .HasComment("外键");
+
+                    b.HasKey("FieldId");
+
+                    b.HasIndex("TableId");
+
+                    b.ToTable("table_structure_column", null, t =>
+                        {
+                            t.HasComment("表字段明细信息");
                         });
                 });
 
@@ -615,91 +874,172 @@ namespace SqlBoTx.Net.DbManager.Migrations
                         });
                 });
 
-            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessMetrics.BusinessMetricJoinPath", b =>
+            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessEntities.DomainEntity", b =>
                 {
-                    b.HasOne("SqlBoTx.Net.Domain.BusinessMetrics.BusinessObjectiveMetric", null)
-                        .WithMany("JoinPaths")
-                        .HasForeignKey("BusinessMetricId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("SqlBoTx.Net.Domain.BusinessObjectives.BusinessObjective", "Domain")
+                        .WithMany("Entities")
+                        .HasForeignKey("DomainId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("SqlBoTx.Net.Domain.DatabaseConnections.DatabaseConnection", "Database")
+                        .WithMany()
+                        .HasForeignKey("ReferenceConnectId")
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("SqlBoTx.Net.Domain.TableStructures.TableStructure", "Table")
                         .WithMany()
-                        .HasForeignKey("TableId")
+                        .HasForeignKey("ReferenceTableId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Database");
+
+                    b.Navigation("Domain");
 
                     b.Navigation("Table");
                 });
 
-            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessMetrics.BusinessObjectiveMetric", b =>
+            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessEntities.DomainEntityAttr", b =>
                 {
-                    b.HasOne("SqlBoTx.Net.Domain.BusinessObjectives.BusinessObjective", "BusinessObjective")
-                        .WithMany("Metrics")
-                        .HasForeignKey("BusinessObjectiveId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("SqlBoTx.Net.Domain.TableStructures.TableStructure", "MainTable")
+                    b.HasOne("SqlBoTx.Net.Domain.TableStructures.TableStructureColumn", "Column")
                         .WithMany()
-                        .HasForeignKey("MainTableId")
+                        .HasForeignKey("ColumnId")
                         .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
-                    b.Navigation("BusinessObjective");
+                    b.HasOne("SqlBoTx.Net.Domain.BusinessEntities.DomainEntity", "Entity")
+                        .WithMany("Attrs")
+                        .HasForeignKey("EntityId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Navigation("MainTable");
+                    b.OwnsOne("SqlBoTx.Net.Domain.DomainEntities.ForeignKeyMetaData", "ForeignKeyMetaData", b1 =>
+                        {
+                            b1.Property<int>("DomainEntityAttrId");
+
+                            b1.Property<string>("TargetEntityId");
+
+                            b1.Property<int>("Type");
+
+                            b1.HasKey("DomainEntityAttrId");
+
+                            b1.ToTable("domain_entity_attr");
+
+                            b1.ToJson("ForeignKeyMetaData");
+
+                            b1.WithOwner()
+                                .HasForeignKey("DomainEntityAttrId");
+
+                            b1.OwnsOne("SqlBoTx.Net.Domain.DomainEntities.PolymorphicForeignKey", "Polymorphic", b2 =>
+                                {
+                                    b2.Property<int>("ForeignKeyMetaDataDomainEntityAttrId");
+
+                                    b2.HasKey("ForeignKeyMetaDataDomainEntityAttrId");
+
+                                    b2.ToTable("domain_entity_attr");
+
+                                    b2.WithOwner()
+                                        .HasForeignKey("ForeignKeyMetaDataDomainEntityAttrId");
+
+                                    b2.OwnsMany("SqlBoTx.Net.Domain.DomainEntities.PolymorphicMapping", "Mappings", b3 =>
+                                        {
+                                            b3.Property<int>("PolymorphicForeignKeyForeignKeyMetaDataDomainEntityAttrId");
+
+                                            b3.Property<int>("__synthesizedOrdinal")
+                                                .ValueGeneratedOnAddOrUpdate();
+
+                                            b3.Property<string>("DiscriminatorColumn")
+                                                .IsRequired();
+
+                                            b3.Property<string>("DiscriminatorValue")
+                                                .IsRequired();
+
+                                            b3.Property<string>("TargetEntityId")
+                                                .IsRequired();
+
+                                            b3.HasKey("PolymorphicForeignKeyForeignKeyMetaDataDomainEntityAttrId", "__synthesizedOrdinal");
+
+                                            b3.ToTable("domain_entity_attr");
+
+                                            b3.WithOwner()
+                                                .HasForeignKey("PolymorphicForeignKeyForeignKeyMetaDataDomainEntityAttrId");
+                                        });
+
+                                    b2.Navigation("Mappings");
+                                });
+
+                            b1.Navigation("Polymorphic");
+                        });
+
+                    b.Navigation("Column");
+
+                    b.Navigation("Entity");
+
+                    b.Navigation("ForeignKeyMetaData")
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessEntities.DomainEntityRel", b =>
+                {
+                    b.HasOne("SqlBoTx.Net.Domain.BusinessEntities.DomainEntity", "SourceEntity")
+                        .WithMany("SourceRels")
+                        .HasForeignKey("SourceEntityId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("SqlBoTx.Net.Domain.BusinessEntities.DomainEntity", "TargetEntity")
+                        .WithMany("TargetRels")
+                        .HasForeignKey("TargetEntityId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.Navigation("SourceEntity");
+
+                    b.Navigation("TargetEntity");
+                });
+
+            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessMetrics.DomainMetric", b =>
+                {
+                    b.HasOne("SqlBoTx.Net.Domain.BusinessObjectives.BusinessObjective", "Domain")
+                        .WithMany("Metrics")
+                        .HasForeignKey("DomainId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Domain");
+                });
+
+            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessMetrics.MetricFieldPlaceholder", b =>
+                {
+                    b.HasOne("SqlBoTx.Net.Domain.BusinessMetrics.DomainMetric", "DomainMetric")
+                        .WithMany("Placeholders")
+                        .HasForeignKey("MetricId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DomainMetric");
                 });
 
             modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessObjectives.BusinessObjective", b =>
                 {
-                    b.OwnsMany("SqlBoTx.Net.Domain.BusinessObjectives.BusinessObjectiveDependencyTable", "DependencyTables", b1 =>
-                        {
-                            b1.Property<int>("BusinessObjectiveId")
-                                .HasColumnType("int")
-                                .HasColumnName("business_objective_id");
+                    b.HasOne("SqlBoTx.Net.Domain.BusinessObjectives.BusinessObjective", "Parent")
+                        .WithMany("Children")
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                            b1.Property<int>("TableId")
-                                .HasColumnType("int")
-                                .HasColumnName("table_id");
-
-                            b1.HasKey("BusinessObjectiveId", "TableId");
-
-                            b1.ToTable("business_objective_dependency_table", (string)null);
-
-                            b1.WithOwner()
-                                .HasForeignKey("BusinessObjectiveId");
-                        });
-
-                    b.Navigation("DependencyTables");
+                    b.Navigation("Parent");
                 });
 
-            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessObjectives.BusinessObjectiveField", b =>
+            modelBuilder.Entity("SqlBoTx.Net.Domain.DomainTerms.DomainTerm", b =>
                 {
-                    b.HasOne("SqlBoTx.Net.Domain.BusinessObjectives.BusinessObjective", "BusinessObjective")
-                        .WithMany("Fields")
-                        .HasForeignKey("BusinessObjectiveId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                    b.HasOne("SqlBoTx.Net.Domain.BusinessObjectives.BusinessObjective", "Domain")
+                        .WithMany("Terms")
+                        .HasForeignKey("DomainId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("SqlBoTx.Net.Domain.TableFields.TableField", "TableField")
-                        .WithMany()
-                        .HasForeignKey("FieldId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("BusinessObjective");
-
-                    b.Navigation("TableField");
-                });
-
-            modelBuilder.Entity("SqlBoTx.Net.Domain.TableFields.TableField", b =>
-                {
-                    b.HasOne("SqlBoTx.Net.Domain.TableStructures.TableStructure", null)
-                        .WithMany("TableFields")
-                        .HasForeignKey("TableId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                    b.Navigation("Domain");
                 });
 
             modelBuilder.Entity("SqlBoTx.Net.Domain.TableRelationships.TableRelationship", b =>
@@ -707,13 +1047,13 @@ namespace SqlBoTx.Net.DbManager.Migrations
                     b.HasOne("SqlBoTx.Net.Domain.TableStructures.TableStructure", "SourceTable")
                         .WithMany("SourceTableRelationships")
                         .HasForeignKey("SourceTableId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.HasOne("SqlBoTx.Net.Domain.TableStructures.TableStructure", "TargetTable")
                         .WithMany("TargetTableRelationships")
                         .HasForeignKey("TargetTableId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("SourceTable");
@@ -730,16 +1070,40 @@ namespace SqlBoTx.Net.DbManager.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessMetrics.BusinessObjectiveMetric", b =>
+            modelBuilder.Entity("SqlBoTx.Net.Domain.TableStructures.TableStructureColumn", b =>
                 {
-                    b.Navigation("JoinPaths");
+                    b.HasOne("SqlBoTx.Net.Domain.TableStructures.TableStructure", "Table")
+                        .WithMany("Columns")
+                        .HasForeignKey("TableId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Table");
+                });
+
+            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessEntities.DomainEntity", b =>
+                {
+                    b.Navigation("Attrs");
+
+                    b.Navigation("SourceRels");
+
+                    b.Navigation("TargetRels");
+                });
+
+            modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessMetrics.DomainMetric", b =>
+                {
+                    b.Navigation("Placeholders");
                 });
 
             modelBuilder.Entity("SqlBoTx.Net.Domain.BusinessObjectives.BusinessObjective", b =>
                 {
-                    b.Navigation("Fields");
+                    b.Navigation("Children");
+
+                    b.Navigation("Entities");
 
                     b.Navigation("Metrics");
+
+                    b.Navigation("Terms");
                 });
 
             modelBuilder.Entity("SqlBoTx.Net.Domain.DatabaseConnections.DatabaseConnection", b =>
@@ -749,9 +1113,9 @@ namespace SqlBoTx.Net.DbManager.Migrations
 
             modelBuilder.Entity("SqlBoTx.Net.Domain.TableStructures.TableStructure", b =>
                 {
-                    b.Navigation("SourceTableRelationships");
+                    b.Navigation("Columns");
 
-                    b.Navigation("TableFields");
+                    b.Navigation("SourceTableRelationships");
 
                     b.Navigation("TargetTableRelationships");
                 });

@@ -16,6 +16,12 @@ namespace SqlBoTx.Net.Domain.DatabaseConnections
     public class DatabaseConnection
     {
         /// <summary>
+        /// 连接ID（主键）
+        /// </summary>
+        [Description("主键自增ID")]
+        public int Id { get; set; }
+
+        /// <summary>
         /// 创建时间
         /// </summary>
         [Description("创建时间")]
@@ -27,11 +33,7 @@ namespace SqlBoTx.Net.Domain.DatabaseConnections
         [Description("最后修改时间")]
         public DateTime? LastModifiedDate { get; set; }
 
-        /// <summary>
-        /// 连接ID（主键）
-        /// </summary>
-        [Description("主键自增ID")]
-        public int ConnectionId { get; set; }
+      
 
         /// <summary>
         /// 连接名称

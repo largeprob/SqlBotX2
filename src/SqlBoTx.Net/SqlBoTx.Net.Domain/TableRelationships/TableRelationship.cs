@@ -30,16 +30,34 @@ namespace SqlBoTx.Net.Domain.TableRelationships
         public int SourceTableId { get; set; }
 
         /// <summary>
+        /// 导航属性 - 源表
+        /// </summary>
+        [ForeignKey("SourceTableId")]
+        public virtual TableStructure? SourceTable { get; set; }
+
+        /// <summary>
         /// 目标表ID（外键，指向TableStructure）
         /// </summary>
         [Description("目标表ID")]
         public int TargetTableId { get; set; }
 
         /// <summary>
-        /// 关系类型-当前表和目标表之间的关系
+        /// 导航属性 - 目标表
         /// </summary>
-        [Description("关系类型")]
-        public TableRelationshipType RelationshipType { get; set; }
+        [ForeignKey("TargetTableId")]
+        public virtual TableStructure? TargetTable { get; set; }
+
+        /// <summary>
+        /// 源端基数（One/Many）
+        /// </summary>
+        [Description("源端基数（One/Many）")]
+        public TableRelationshipType SourceCardinality { get; set; }
+
+        /// <summary>
+        /// 目标端基数（One/Many）
+        /// </summary>
+        [Description("目标端基数（One/Many）")]
+        public TableRelationshipType TargetCardinality { get; set; }
 
         /// <summary>
         /// 关联条件（JSON格式存储）
@@ -66,16 +84,5 @@ namespace SqlBoTx.Net.Domain.TableRelationships
         [Description("更新时间")]
         public DateTime? UpdatedAt { get; set; }
 
-        /// <summary>
-        /// 导航属性 - 源表
-        /// </summary>
-        [ForeignKey("SourceTableId")]
-        public virtual TableStructure? SourceTable { get; set; }
-
-        /// <summary>
-        /// 导航属性 - 目标表
-        /// </summary>
-        [ForeignKey("TargetTableId")]
-        public virtual TableStructure? TargetTable { get; set; }
     }
 }

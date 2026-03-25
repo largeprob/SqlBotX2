@@ -3,6 +3,10 @@ ct2 as (select 2024 as year,100 as c2),
 ct3 as (select 2026 as year,1001 as r2)
 select  FORMAT(((ct1.c1 - ct2.c2) * 1.0 / ct2.c2 * 100), 'N2') + '%' AS '2025年新增客户同比',ct3.r2 as '2026年新增客户总数'
 from ct1,ct2,ct3
+
+
+
+
  
 CREATE TABLE #sales (
     sale_date DATE,          -- 销售日期

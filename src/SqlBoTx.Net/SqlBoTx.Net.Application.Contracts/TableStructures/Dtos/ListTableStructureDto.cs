@@ -39,31 +39,7 @@ namespace SqlBoTx.Net.Application.Contracts.TableStructures.Dtos
         /// 表描述
         /// </summary>
         public string? Description { get; set; }
-
-        /// <summary>
-        /// 颗粒度描述
-        /// </summary>
-        [Description("颗粒度描述")]
-        public string? Granularity { get; set; }
-
-        /// <summary>
-        /// 颗粒度级别
-        /// </summary>
-        [Description("颗粒度级别")]
-        public TableStructureGranularityLevel? GranularityLevel { get; set; }
-
-        /// <summary>
-        /// 颗粒度级别
-        /// </summary>
-        [Description("颗粒度级别")]
-        public string? GranularityLevelStr
-        {
-            get
-            {
-                return GranularityLevel?.GetDescription();
-            }
-        }
-
+ 
         /// <summary>
         /// 表字段列表
         /// </summary>

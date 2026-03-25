@@ -1,5 +1,4 @@
 ﻿using SqlBoTx.Net.Domain.Share.Enums;
-using SqlBoTx.Net.Domain.TableFields;
 using SqlBoTx.Net.Domain.TableRelationships;
 using System;
 using System.Collections.Generic;
@@ -26,7 +25,7 @@ namespace SqlBoTx.Net.Domain.TableStructures
         /// <summary>
         /// 数据库连接ID（外键）
         /// </summary>
-        [Description("外键")]
+        [Description("数据库连接ID")]
         public int ConnectionId { get; set; }
 
         /// <summary>
@@ -36,10 +35,16 @@ namespace SqlBoTx.Net.Domain.TableStructures
         public string? TableName { get; set; }
 
         /// <summary>
-        /// 显示名称
+        /// 模式
         /// </summary>
-        [Description("显示名称")]
-        public string? DisplayName { get; set; }
+        [Description("模式")]
+        public string? SchemaName { get; set; }
+
+        /// <summary>
+        /// 别名
+        /// </summary>
+        [Description("别名")]
+        public string? Alias { get; set; }
 
         /// <summary>
         /// 字段数量
@@ -54,21 +59,9 @@ namespace SqlBoTx.Net.Domain.TableStructures
         public string? Description { get; set; }
 
         /// <summary>
-        /// 颗粒度描述
-        /// </summary>
-        [Description("颗粒度描述")]
-        public string? Granularity { get; set; }
-
-        /// <summary>
-        /// 颗粒度级别
-        /// </summary>
-        [Description("颗粒度级别")]
-        public TableStructureGranularityLevel? GranularityLevel { get; set; }
-
-        /// <summary>
         /// 导航属性 - 表字段明细
         /// </summary>
-        public virtual ICollection<TableField> TableFields { get; set; } = new List<TableField>();
+        public virtual ICollection<TableStructureColumn> Columns { get; set; } = new List<TableStructureColumn>();
 
         /// <summary>
         /// 导航属性 - 作为源表的关系列表

@@ -9,27 +9,15 @@ namespace SqlBoTx.Net.Domain.Share.Enums
     public enum TableRelationshipType
     {
         /// <summary>
-        /// 一对多
+        /// 一
         /// </summary>
-        [Description("一对多")]
-        OneToMany = 1,
+        [Description("一")]
+        One = 1,
 
         /// <summary>
-        /// 多对一
+        /// 多
         /// </summary>
-        [Description("多对一")]
-        ManyToOne = 2,
-
-        /// <summary>
-        /// 一对一
-        /// </summary>
-        [Description("一对一")]
-        OneToOne = 3,
-
-        /// <summary>
-        /// 多对多
-        /// </summary>
-        [Description("多对多")]
-        ManyToMany = 4
+        [Description("多")]
+        Many = 2,
     }
 }

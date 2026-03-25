@@ -20,13 +20,15 @@ namespace SqlBoTx.Net.EFCore.Mappings
 
             builder.Property(x => x.SourceTableId).IsRequired();
             builder.Property(x => x.TargetTableId).IsRequired();
-            builder.Property(x => x.RelationshipType).IsRequired();
+            builder.Property(x => x.SourceCardinality).IsRequired();
+            builder.Property(x => x.TargetCardinality).IsRequired();
             builder.Property(x => x.Conditions).IsRequired().HasColumnType("NVARCHAR(500)").HasConversion(
              //存
              v => v == null || v.Count <= 0 ? "[]" : JsonSerializer.Serialize(v),
              //取
              v => JsonSerializer.Deserialize<List<TableRelationshipCondition>>(v)
              );
+            builder.Property(x => x.RelationshipDescription);
             builder.Property(x => x.CreatedAt).IsRequired();
             builder.Property(x => x.UpdatedAt);
 
@@ -34,12 +36,12 @@ namespace SqlBoTx.Net.EFCore.Mappings
             builder.HasOne(x => x.SourceTable)
                    .WithMany(t => t.SourceTableRelationships)
                    .HasForeignKey(x => x.SourceTableId)
-                   .OnDelete(DeleteBehavior.Cascade);
+                   .OnDelete(DeleteBehavior.NoAction);
 
             builder.HasOne(x => x.TargetTable)
                    .WithMany(t => t.TargetTableRelationships)
                    .HasForeignKey(x => x.TargetTableId)
-                   .OnDelete(DeleteBehavior.Restrict);
+                   .OnDelete(DeleteBehavior.NoAction);
 
             // 添加索引以提高查询性能
             builder.HasIndex(x => x.SourceTableId);

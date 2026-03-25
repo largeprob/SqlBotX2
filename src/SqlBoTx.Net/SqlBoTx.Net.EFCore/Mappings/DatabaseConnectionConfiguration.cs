@@ -12,8 +12,8 @@ namespace SqlBoTx.Net.EFCore.Mappings
         public void Configure(EntityTypeBuilder<DatabaseConnection> builder)
         {
             //主键
-            builder.HasKey(x => x.ConnectionId);
-            builder.Property(x => x.ConnectionId).ValueGeneratedOnAdd();
+            builder.HasKey(x => x.Id);
+            builder.Property(x => x.Id).ValueGeneratedOnAdd();
 
             builder.Property(x => x.CreatedDate).IsRequired() ;
             builder.Property(x => x.LastModifiedDate).IsRequired(false);

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.SemanticKernel;
 using OpenAI;
+using OpenAI.Chat;
 using System;
 using System.ClientModel;
 using System.Collections.Generic;
@@ -21,7 +22,6 @@ namespace SqlBoTx.Net.Core.Startups
                 var enableKey = builder.Configuration.GetSection("Models").Get<List<ModleInfo>>();
                 foreach (var model in enableKey)
                 {
-
                     //var openAIClientCredential = new ApiKeyCredential(model.Key);
                     //var openAIClientOption = new OpenAIClientOptions
                     //{
@@ -43,10 +43,24 @@ namespace SqlBoTx.Net.Core.Startups
                         var openAIClientOption = new OpenAIClientOptions
                         {
                             Endpoint = new Uri(model.Endpoint),
-
                         };
                         builder.Services.AddOpenAIChatCompletion(model.ModelId, new OpenAIClient(openAIClientCredential, openAIClientOption));
+
+
+                        builder.Services.AddKeyedTransient<OpenAIClient>(model.ModelId, (serverprovider, _) =>
+                        {
+                            var apiKey = new ApiKeyCredential(model.Key);
+                            var clientOptions = new OpenAIClientOptions
+                            {
+                                Endpoint = new Uri(model.Endpoint),
+                            };
+                            return new OpenAIClient(openAIClientCredential, openAIClientOption);
+                        });
                     }
+
+
+
+
 
                     if (model.ModelType == ModelType.Embedding)
                     {

@@ -8,35 +8,35 @@ namespace SqlBoTx.Net.Domain.BusinessMetrics
         /// Get IQueryable
         /// </summary>
         /// <returns><see cref="IQueryable<BusinessMetric>"/></returns>
-        IQueryable<BusinessObjectiveMetric> IQueryable();
+        IQueryable<DomainMetric> IQueryable();
 
         /// <summary>
         /// Get BusinessMetric by ID
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        Task<BusinessObjectiveMetric?> GetByIdAsync(int id);
+        Task<DomainMetric?> GetByIdAsync(int id);
 
         /// <summary>
         /// Get List of BusinessMetric
         /// </summary>
         /// <param name="includeFunc"></param>
         /// <returns></returns>
-        Task<List<BusinessObjectiveMetric>> ListAsync(Func<IQueryable<BusinessObjectiveMetric>, IQueryable<BusinessObjectiveMetric>>? includeFunc = null);
+        Task<List<DomainMetric>> ListAsync(Func<IQueryable<DomainMetric>, IQueryable<DomainMetric>>? includeFunc = null);
 
         /// <summary>
         /// Insert
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        Task InsterAsync(BusinessObjectiveMetric entity);
+        Task InsterAsync(DomainMetric entity);
 
         /// <summary>
         /// Update
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        Task UpdateAsync(BusinessObjectiveMetric entity);
+        Task UpdateAsync(DomainMetric entity);
 
         /// <summary>
         /// Delete

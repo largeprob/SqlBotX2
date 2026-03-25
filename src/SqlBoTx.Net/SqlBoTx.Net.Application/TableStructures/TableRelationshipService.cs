@@ -41,15 +41,15 @@ namespace SqlBoTx.Net.Application.TableStructures
 
             return relationships.Select(r => new ListTableRelationshipDto
             {
-                Id = r.Id,
-                SourceTableId = r.SourceTableId,
-                TargetTableId = r.TargetTableId,
-                RelationshipType = r.RelationshipType,
-                JoinConditions = r.Conditions,
-                SourceTableName = r.SourceTable?.TableName,
-                SourceTableDisplayName = r.SourceTable?.DisplayName,
-                TargetTableName = r.TargetTable?.TableName,
-                TargetTableDisplayName = r.TargetTable?.DisplayName
+                //Id = r.Id,
+                //SourceTableId = r.SourceTableId,
+                //TargetTableId = r.TargetTableId,
+                //RelationshipType = r.RelationshipType,
+                //JoinConditions = r.Conditions,
+                //SourceTableName = r.SourceTable?.TableName,
+                //SourceTableDisplayName = r.SourceTable?.DisplayName,
+                //TargetTableName = r.TargetTable?.TableName,
+                //TargetTableDisplayName = r.TargetTable?.DisplayName
             }).ToList();
         }
 
@@ -64,15 +64,15 @@ namespace SqlBoTx.Net.Application.TableStructures
 
             return relationships.Select(r => new ListTableRelationshipDto
             {
-                Id = r.Id,
-                SourceTableId = r.SourceTableId,
-                TargetTableId = r.TargetTableId,
-                RelationshipType = r.RelationshipType,
-                JoinConditions = r.Conditions,
-                SourceTableName = r.SourceTable?.TableName,
-                SourceTableDisplayName = r.SourceTable?.DisplayName,
-                TargetTableName = r.TargetTable?.TableName,
-                TargetTableDisplayName = r.TargetTable?.DisplayName
+                //Id = r.Id,
+                //SourceTableId = r.SourceTableId,
+                //TargetTableId = r.TargetTableId,
+                //RelationshipType = r.RelationshipType,
+                //JoinConditions = r.Conditions,
+                //SourceTableName = r.SourceTable?.TableName,
+                //SourceTableDisplayName = r.SourceTable?.DisplayName,
+                //TargetTableName = r.TargetTable?.TableName,
+                //TargetTableDisplayName = r.TargetTable?.DisplayName
             }).ToList();
         }
 

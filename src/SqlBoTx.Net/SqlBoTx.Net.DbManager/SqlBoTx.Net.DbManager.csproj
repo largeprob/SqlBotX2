@@ -22,4 +22,13 @@
     <ProjectReference Include="..\SqlBoTx.Net.ServiceDefaults\SqlBoTx.Net.ServiceDefaults.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="SeedDatas\业务库_CRM系统_数据.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="SeedDatas\业务库_CRM系统_表结构.sql">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

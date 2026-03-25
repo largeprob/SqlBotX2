@@ -37,10 +37,7 @@ namespace SqlBoTx.Net.Application.BusinessMetrics
         /// <returns></returns>
         public async Task<List<ListBusinessMetricDto>> ListAsync()
         {
-            var list = await _businessMetricRepository.ListAsync(q => q
-                .Include(x => x.JoinPaths)
-                .Include(x => x.MainTable)
-                .Include(x => x.BusinessObjective));
+            var list = await _businessMetricRepository.ListAsync();
 
             var result = list.Adapt<List<ListBusinessMetricDto>>();
 
@@ -48,14 +45,7 @@ namespace SqlBoTx.Net.Application.BusinessMetrics
             var tableIds = new List<int>();
             foreach (var item in list)
             {
-                if (item.MainTableId > 0)
-                {
-                    tableIds.Add(item.MainTableId);
-                }
-                if (item.JoinPaths != null)
-                {
-                    tableIds.AddRange(item.JoinPaths.Select(x => x.TableId));
-                }
+                
             }
             tableIds = tableIds.Distinct().ToList();
 
@@ -92,7 +82,7 @@ namespace SqlBoTx.Net.Application.BusinessMetrics
         /// <returns></returns>
         public async Task AddAsync(AddBusinessMetricDto input)
         {
-            var entity = input.Adapt<BusinessObjectiveMetric>();
+            var entity = input.Adapt<DomainMetric>();
             entity = await _businessMetricManager.CreateAsync(entity);
 
             await using (var uow = await _unitOfWork.BeginTransactionAsync())
@@ -109,7 +99,7 @@ namespace SqlBoTx.Net.Application.BusinessMetrics
         /// <returns></returns>
         public async Task UpdateAsync(UpdateBusinessMetricDto input)
         {
-            var entity = input.Adapt<BusinessObjectiveMetric>();
+            var entity = input.Adapt<DomainMetric>();
             entity = await _businessMetricManager.UpdateAsync(entity);
 
             await using (var uow = await _unitOfWork.BeginTransactionAsync())

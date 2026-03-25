@@ -80,7 +80,7 @@ namespace SqlBoTx.Net.EFCore.Repositorys
         /// <returns></returns>
         public async Task UpdateAsync(BusinessObjective entity)
         {
-            var existingEntity = await _dbContext.Set<BusinessObjective>().Include(x => x.DependencyTables).FirstAsync(x => x.Id == entity.Id);
+            var existingEntity = await _dbContext.Set<BusinessObjective>().FirstAsync(x => x.Id == entity.Id);
             _dbContext.Entry(existingEntity).CurrentValues.SetValues(entity);
         }
 

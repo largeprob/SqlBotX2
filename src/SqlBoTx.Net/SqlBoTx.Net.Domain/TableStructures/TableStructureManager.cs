@@ -1,5 +1,4 @@
 using SqlBoTx.Net.Domain.DatabaseConnections;
-using SqlBoTx.Net.Domain.TableFields;
 using SqlBoTx.Net.Share.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -25,7 +24,7 @@ namespace SqlBoTx.Net.Domain.TableStructures
         /// <param name="input"></param>
         /// <param name="tableFields"></param>
         /// <returns></returns>
-        public async Task<TableStructure> CreateAsync(TableStructure input, List<TableField> tableFields)
+        public async Task<TableStructure> CreateAsync(TableStructure input, List<TableStructureColumn> tableFields)
         {
             if (!await _databaseConnectionRepository.ExistAsync(input.ConnectionId))
             {
@@ -33,7 +32,7 @@ namespace SqlBoTx.Net.Domain.TableStructures
             }
             
             // Set the table fields
-            input.TableFields = tableFields;
+            input.Columns = tableFields;
 
             // Set FieldCount based on the number of fields
             input.FieldCount = tableFields.Count;
@@ -47,10 +46,10 @@ namespace SqlBoTx.Net.Domain.TableStructures
         /// <param name="input"></param>
         /// <param name="tableFields"></param>
         /// <returns></returns>
-        public async Task<TableStructure> UpdateAsync(TableStructure input, List<TableField> tableFields)
+        public async Task<TableStructure> UpdateAsync(TableStructure input, List<TableStructureColumn> tableFields)
         {
             // Update the table fields
-            input.TableFields = tableFields;
+            input.Columns = tableFields;
 
             // Update FieldCount based on the number of fields
             input.FieldCount = tableFields.Count;

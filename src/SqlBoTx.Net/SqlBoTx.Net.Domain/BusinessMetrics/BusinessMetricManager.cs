@@ -17,7 +17,7 @@ namespace SqlBoTx.Net.Domain.BusinessMetrics
         /// <summary>
         /// 创建业务指标
         /// </summary>
-        public async Task<BusinessObjectiveMetric> CreateAsync(BusinessObjectiveMetric input)
+        public async Task<DomainMetric> CreateAsync(DomainMetric input)
         {
 
             // 验证指标编码是否已存在
@@ -36,7 +36,7 @@ namespace SqlBoTx.Net.Domain.BusinessMetrics
         /// <summary>
         /// 更新业务指标
         /// </summary>
-        public async Task<BusinessObjectiveMetric> UpdateAsync(BusinessObjectiveMetric input)
+        public async Task<DomainMetric> UpdateAsync(DomainMetric input)
         {
             // 验证是否存在
             var existing = await _businessMetricRepository.GetByIdAsync(input.Id);

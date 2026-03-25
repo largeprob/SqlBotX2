@@ -20,9 +20,9 @@ namespace SqlBoTx.Net.EFCore.Repositorys
         /// Get IQueryable
         /// </summary>
         /// <returns><see cref="IQueryable<BusinessMetric>"/></returns>
-        public IQueryable<BusinessObjectiveMetric> IQueryable()
+        public IQueryable<DomainMetric> IQueryable()
         {
-            return _dbContext.Set<BusinessObjectiveMetric>();
+            return _dbContext.Set<DomainMetric>();
         }
 
         /// <summary>
@@ -30,9 +30,9 @@ namespace SqlBoTx.Net.EFCore.Repositorys
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<BusinessObjectiveMetric?> GetByIdAsync(int id)
+        public async Task<DomainMetric?> GetByIdAsync(int id)
         {
-            return await _dbContext.Set<BusinessObjectiveMetric>()
+            return await _dbContext.Set<DomainMetric>()
                 .FirstOrDefaultAsync(x => x.Id == id);
         }
 
@@ -41,9 +41,9 @@ namespace SqlBoTx.Net.EFCore.Repositorys
         /// </summary>
         /// <param name="includeFunc"></param>
         /// <returns></returns>
-        public async Task<List<BusinessObjectiveMetric>> ListAsync(Func<IQueryable<BusinessObjectiveMetric>, IQueryable<BusinessObjectiveMetric>>? includeFunc = null)
+        public async Task<List<DomainMetric>> ListAsync(Func<IQueryable<DomainMetric>, IQueryable<DomainMetric>>? includeFunc = null)
         {
-            var query = _dbContext.Set<BusinessObjectiveMetric>().AsQueryable();
+            var query = _dbContext.Set<DomainMetric>().AsQueryable();
             if (includeFunc != null)
             {
                 query = includeFunc(query);
@@ -56,9 +56,9 @@ namespace SqlBoTx.Net.EFCore.Repositorys
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public async Task InsterAsync(BusinessObjectiveMetric entity)
+        public async Task InsterAsync(DomainMetric entity)
         {
-            await _dbContext.Set<BusinessObjectiveMetric>().AddAsync(entity);
+            await _dbContext.Set<DomainMetric>().AddAsync(entity);
         }
 
         /// <summary>
@@ -66,10 +66,9 @@ namespace SqlBoTx.Net.EFCore.Repositorys
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public async Task UpdateAsync(BusinessObjectiveMetric entity)
+        public async Task UpdateAsync(DomainMetric entity)
         {
-            var existingEntity = await _dbContext.Set<BusinessObjectiveMetric>()
-                .Include(x => x.JoinPaths)
+            var existingEntity = await _dbContext.Set<DomainMetric>()
                 .FirstAsync(x => x.Id == entity.Id);
             _dbContext.Entry(existingEntity).CurrentValues.SetValues(entity);
         }
@@ -81,9 +80,8 @@ namespace SqlBoTx.Net.EFCore.Repositorys
         /// <returns></returns>
         public async Task DeleteAsync(int id)
         {
-            await _dbContext.Set<BusinessObjectiveMetric>()
+            await _dbContext.Set<DomainMetric>()
                .Where(x => x.Id == id)
-               .Include(x=>x.JoinPaths)
                .ExecuteDeleteAsync();
         }
     }

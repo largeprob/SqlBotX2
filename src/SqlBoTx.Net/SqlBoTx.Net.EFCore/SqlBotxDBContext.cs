@@ -4,10 +4,11 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using SqlBoTx.Net.Domain;
+using SqlBoTx.Net.Domain.BusinessEntities;
 using SqlBoTx.Net.Domain.BusinessMetrics;
 using SqlBoTx.Net.Domain.BusinessObjectives;
 using SqlBoTx.Net.Domain.DatabaseConnections;
-using SqlBoTx.Net.Domain.TableFields;
+using SqlBoTx.Net.Domain.DomainTerms;
 using SqlBoTx.Net.Domain.TableRelationships;
 using SqlBoTx.Net.Domain.TableStructures;
 using System;
@@ -29,19 +30,17 @@ namespace SqlBoTx.Net.EFCore
         }
         public DbSet<DatabaseConnection> DatabaseConnection { get; set; }
         public DbSet<TableStructure> TableStructure { get; set; }
-
-        public DbSet<TableField> TableField { get; set; }
-
+        public DbSet<TableStructureColumn> TableStructureColumn { get; set; }
         public DbSet<TableRelationship> TableRelationship { get; set; }
 
-        public DbSet<BusinessObjective> BusinessObjective { get; set; }
 
-        public DbSet<BusinessObjectiveField> BusinessObjectiveField { get; set; }
-
-        public DbSet<BusinessObjectiveMetric> BusinessObjectiveMetric { get; set; }
-
-        public DbSet<BusinessMetricJoinPath> BusinessMetricJoinPath { get; set; }
-
+        public DbSet<BusinessObjective> BusinessDomain { get; set; }
+        public DbSet<DomainEntity> DomainEntity { get; set; }
+        public DbSet<DomainEntityAttr> DomainEntityAttr { get; set; }
+        public DbSet<DomainEntityRel> DomainEntityRel { get; set; }
+        public DbSet<DomainMetric> DomainMetric { get; set; }
+        public DbSet<MetricFieldPlaceholder> MetricFieldPlaceholder { get; set; }
+        public DbSet<DomainTerm> DomainTerm { get; set; }
 
         /// <summary>
         /// 注册模型
@@ -52,7 +51,6 @@ namespace SqlBoTx.Net.EFCore
                 .Where(p => p.PropertyType.IsGenericType && p.PropertyType.GetGenericTypeDefinition() == typeof(DbSet<>))
                 .Select(p => p.PropertyType.GetGenericArguments()[0])
                 .ToList();
-
 
             foreach (var entityType in entityTypes)
             {

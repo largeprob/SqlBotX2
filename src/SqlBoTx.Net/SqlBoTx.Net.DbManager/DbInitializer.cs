@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SqlBoTx.Net.Application.Vectors;
 using SqlBoTx.Net.DbManager.SeedDatas;
-using SqlBoTx.Net.Domain.TableFields;
 using SqlBoTx.Net.Domain.TableStructures;
 using SqlBoTx.Net.EFCore;
 using SqlBoTx.Net.Share.Helpers;

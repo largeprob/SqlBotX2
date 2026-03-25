@@ -17,7 +17,6 @@ namespace SqlBoTx.Net.EFCore
         private bool _isCommitted;
         private bool _isDisposed;
       
-
         public async Task<IUnitOfWork> BeginTransactionAsync()
         {
             if (_currentTransaction != null)
@@ -41,8 +40,6 @@ namespace SqlBoTx.Net.EFCore
             _isCommitted = false;
             return this;
         }
-
-
       
         public async Task CommitAsync()
         {
